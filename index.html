@@ -1,323 +1,387 @@
-import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { CardContent } from '@/components/ui/card';
-import { CardHeader } from '@/components/ui/card';
-import { CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { ChevronRight, ChevronLeft, Check, RefreshCcw, Search, Lightbulb, Pencil, EyeIcon, BookOpen, HelpCircle } from 'lucide-react';
-
-const PolyaFramework = () => {
-  const steps = [
-    {
-      title: "Zrozumienie Problemu",
-      questions: [
-        { id: "u1", text: "Co próbujesz znaleźć lub rozwiązać?" },
-        { id: "u2", text: "Jakie informacje są podane?" },
-        { id: "u3", text: "Jakie są niewiadome?" },
-        { id: "u4", text: "Czy możesz przeformułować problem własnymi słowami?" }
-      ],
-      key: "understanding",
-      icon: Search,
-      color: "bg-pink-500",
-      emoji: "🔍"
-    },
-    {
-      title: "Opracowanie Planu",
-      questions: [
-        { id: "p1", text: "Czy widziałeś podobny problem wcześniej?" },
-        { id: "p2", text: "Czy możesz rozłożyć to na mniejsze kroki?" },
-        { id: "p3", text: "Jaka strategia może tutaj zadziałać?" },
-        { id: "p4", text: "Jakie narzędzia lub metody mogą pomóc?" }
-      ],
-      key: "planning",
-      icon: Lightbulb,
-      color: "bg-yellow-400",
-      emoji: "💡"
-    },
-    {
-      title: "Realizacja Planu",
-      questions: [
-        { id: "e1", text: "Zapisz każdy krok swojego rozwiązania" },
-        { id: "e2", text: "Czy jesteś pewien, że każdy krok jest poprawny?" },
-        { id: "e3", text: "Czy możesz udowodnić, że każdy krok jest poprawny?" },
-        { id: "e4", text: "Co może pójść nie tak?" }
-      ],
-      key: "execution",
-      icon: Pencil,
-      color: "bg-teal-500",
-      emoji: "✏️"
-    },
-    {
-      title: "Spojrzenie Wstecz",
-      questions: [
-        { id: "r1", text: "Czy twoja odpowiedź jest rozsądna?" },
-        { id: "r2", text: "Czy możesz sprawdzić wynik?" },
-        { id: "r3", text: "Czy możesz rozwiązać to w inny sposób?" },
-        { id: "r4", text: "Czego nauczyłeś się z tego problemu?" }
-      ],
-      key: "reflection",
-      icon: EyeIcon,
-      color: "bg-purple-500",
-      emoji: "👀"
-    }
-  ];
-
-  const [currentStep, setCurrentStep] = useState(0);
-  const [responses, setResponses] = useState({});
-  const [showExamples, setShowExamples] = useState(true);
-
-  const sampleProblem = "Maria ma 24 cukierki. Chce je równo podzielić między siebie i przyjaciół na swoim przyjęciu urodzinowym. Jeśli każda osoba dostanie 4 cukierki, ilu przyjaciół Maria może zaprosić na swoje przyjęcie?";
-  
-  const exampleResponses = {
-    "u1": "Muszę znaleźć, ilu przyjaciół Maria może zaprosić na swoje przyjęcie.",
-    "u2": "Maria ma łącznie 24 cukierki. Każda osoba (łącznie z Marią) dostaje 4 cukierki.",
-    "u3": "Nie wiem, ilu przyjaciół może zaprosić.",
-    "u4": "Maria dzieli 24 cukierki tak, że każdy dostaje 4 cukierki. Muszę znaleźć, ile osób może dostać cukierki.",
-    "p1": "To jest jak zadanie z dzieleniem! Muszę podzielić łączną liczbę cukierków przez liczbę cukierków dla każdej osoby.",
-    "p2": "Krok 1: Ustalić, ile osób może dostać cukierki.\nKrok 2: Ponieważ Maria jest jedną z tych osób, liczba przyjaciół jest o jeden mniejsza niż całkowita liczba osób.",
-    "p3": "Podzielę łączną liczbę cukierków przez liczbę cukierków na osobę.",
-    "p4": "Dzielenie pomoże mi rozwiązać ten problem.",
-    "e1": "Łączna liczba cukierków ÷ Cukierki na osobę = Liczba osób\n24 ÷ 4 = 6 osób\nPonieważ Maria jest jedną z tych osób, może zaprosić 6 - 1 = 5 przyjaciół.",
-    "e2": "Tak, ponieważ 6 osób × 4 cukierki = 24 cukierki łącznie.",
-    "e3": "Mogę sprawdzić licząc: Maria (4) + Przyjaciel 1 (4) + Przyjaciel 2 (4) + Przyjaciel 3 (4) + Przyjaciel 4 (4) + Przyjaciel 5 (4) = 24 cukierki",
-    "e4": "Mogę zapomnieć odjąć Marię od całkowitej liczby osób.",
-    "r1": "Tak, 5 przyjaciół wydaje się rozsądne dla małego przyjęcia urodzinowego z ograniczoną liczbą cukierków.",
-    "r2": "Mogę rozwiązać to w inny sposób: 24 cukierki - 4 dla Marii = 20 cukierków zostało. Następnie 20 ÷ 4 = 5 przyjaciół.",
-    "r3": "Mogłabym narysować 24 cukierki i zakreślać grupy po 4, aż się skończą, a następnie policzyć grupy i odjąć 1 dla Marii.",
-    "r4": "Nauczyłem się, że w zadaniach z dzieleniem z udziałem ludzi, czasami muszę pamiętać, czy osoba dzieląca jest wliczona do całkowitej liczby osób!"
-  };
-
-  const handleInputChange = (questionId, value) => {
-    setResponses(prev => ({
-      ...prev,
-      [questionId]: value
-    }));
-  };
-
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(prev => prev + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
-    }
-  };
-
-  const handleReset = () => {
-    setCurrentStep(0);
-    setResponses({});
-  };
-  
-  const handleToggleExamples = () => {
-    setShowExamples(!showExamples);
-  };
-
-  return (
-    <div className="max-w-4xl mx-auto p-4 space-y-4 font-sans">
-      {/* Sample Problem Card */}
-      <Card className="rounded-xl border-4 border-yellow-300 overflow-hidden shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-yellow-100 to-amber-100 pb-4 pt-6">
-          <CardTitle className="text-2xl font-bold text-center text-amber-700 flex items-center justify-center gap-2">
-            <BookOpen className="w-6 h-6" />
-            Przykładowy Problem
-            <BookOpen className="w-6 h-6" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 bg-gradient-to-b from-white to-yellow-50">
-          <div className="text-xl text-center font-bold text-amber-800 p-4 border-2 border-dashed border-amber-300 rounded-lg bg-amber-50">
-            {sampleProblem}
-          </div>
-          
-          <div className="flex justify-center mt-4">
-            <Button 
-              onClick={handleToggleExamples} 
-              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white rounded-full px-6 py-2 shadow-md"
-            >
-              {showExamples ? (
-                <>Ukryj Przykładowe Odpowiedzi <EyeIcon className="w-5 h-5" /></>
-              ) : (
-                <>Pokaż Przykładowe Odpowiedzi <HelpCircle className="w-5 h-5" /></>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="rounded-xl border-4 border-indigo-300 overflow-hidden shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-indigo-100 via-pink-100 to-purple-100 pb-4 pt-6">
-          <CardTitle className="text-3xl font-bold text-center text-indigo-700">
-            Przygoda z Rozwiązywaniem Problemów Pólyi! 🚀
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 bg-gradient-to-b from-white to-blue-50">
-          <div className="space-y-6">
-            {/* Progress indicator */}
-            <div className="flex justify-between mb-8">
-              {steps.map((step, index) => (
-                <button 
-                  key={index}
-                  onClick={() => setCurrentStep(index)}
-                  className={`flex-1 text-center relative cursor-pointer hover:opacity-80 transition-transform hover:scale-105 transform ${
-                    index === currentStep 
-                      ? 'font-bold' 
-                      : ''
-                  }`}
-                >
-                  <div className="flex flex-col items-center gap-1">
-                    <div className={`rounded-full w-14 h-14 flex items-center justify-center ${step.color} transition-all duration-300 shadow-md ${
-                      index === currentStep ? 'ring-4 ring-indigo-300 scale-110' : ''
-                    }`}>
-                      <span className="text-xl">{step.emoji}</span>
-                    </div>
-                    <div className="text-sm mb-1 font-medium mt-1" style={{ color: index === currentStep ? '#4F46E5' : '#6366F1' }}>{step.title}</div>
-                  </div>
-                  <div className="h-3 bg-gray-200 rounded-full relative mt-1">
-                    <div 
-                      className={`absolute left-0 top-0 h-full rounded-full transition-all ${step.color}
-                      ${index <= currentStep ? 'w-full' : 'w-0'}`}
-                    />
-                  </div>
-                </button>
-              ))}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polya Framework</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles if needed, though Tailwind handles most */
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        /* Style for textareas that mimic the Textarea component */
+        textarea {
+            resize: vertical; /* Allows vertical resizing */
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="max-w-4xl mx-auto p-4 space-y-4 font-sans">
+        <div class="rounded-xl border-4 border-yellow-300 overflow-hidden shadow-lg">
+            <div class="bg-gradient-to-r from-yellow-100 to-amber-100 pb-4 pt-6">
+                <h2 class="text-2xl font-bold text-center text-amber-700 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    Przykładowy Problem
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </h2>
             </div>
-
-            {/* Current step content */}
-            <div className="space-y-6 p-6 border-4 rounded-xl border-gray-200 bg-white shadow-lg mt-6">
-              <div className="flex items-center gap-3 bg-gradient-to-r from-pink-100 to-indigo-100 p-4 rounded-lg">
-                <div className={`rounded-full p-3 ${steps[currentStep].color} shadow-md`}>
-                  <span className="text-2xl">{steps[currentStep].emoji}</span>
+            <div class="p-6 bg-gradient-to-b from-white to-yellow-50">
+                <div id="sampleProblem" class="text-xl text-center font-bold text-amber-800 p-4 border-2 border-dashed border-amber-300 rounded-lg bg-amber-50">
+                    Maria ma 24 cukierki. Chce je równo podzielić między siebie i przyjaciół na swoim przyjęciu urodzinowym. Jeśli każda osoba dostanie 4 cukierki, ilu przyjaciół Maria może zaprosić na swoje przyjęcie?
                 </div>
-                <h3 className="text-2xl font-bold text-indigo-800">
-                  Krok {currentStep + 1}: {steps[currentStep].title}
-                </h3>
-              </div>
-              
-              <div className="space-y-6">
-                {steps[currentStep].questions.map((question, qIndex) => (
-                  <div key={question.id} className="space-y-3 p-4 border-4 border-blue-200 bg-blue-50 rounded-xl shadow-md transition-all hover:shadow-lg">
-                    <div className="font-bold text-indigo-700 flex items-center gap-2">
-                      <span className="bg-indigo-600 text-white rounded-full w-6 h-6 inline-flex items-center justify-center text-sm font-bold">{qIndex+1}</span>
-                      {question.text}
-                    </div>
-                    <Textarea
-                      className="w-full h-24 bg-white border-blue-200 rounded-lg shadow-inner text-lg"
-                      placeholder="Napisz tutaj swoją super odpowiedź..."
-                      value={responses[question.id] || ''}
-                      onChange={(e) => handleInputChange(question.id, e.target.value)}
-                    />
-                    {showExamples && exampleResponses[question.id] && (
-                      <div className="mt-2 p-3 bg-green-50 border-2 border-green-200 rounded-lg">
-                        <div className="font-bold text-green-800 mb-1 flex items-center gap-1">
-                          <HelpCircle className="w-4 h-4" /> Przykładowa Odpowiedź:
+                <div class="flex justify-center mt-4">
+                    <button id="toggleExamplesButton" class="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white rounded-full px-6 py-2 shadow-md">
+                        <span id="toggleExamplesText">Ukryj Przykładowe Odpowiedzi</span>
+                        <svg id="toggleExamplesIconHide" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg id="toggleExamplesIconShow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-help-circle hidden"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-xl border-4 border-indigo-300 overflow-hidden shadow-lg">
+            <div class="bg-gradient-to-r from-indigo-100 via-pink-100 to-purple-100 pb-4 pt-6">
+                <h2 class="text-3xl font-bold text-center text-indigo-700">
+                    Przygoda z Rozwiązywaniem Problemów Pólyi! 🚀
+                </h2>
+            </div>
+            <div class="p-6 bg-gradient-to-b from-white to-blue-50">
+                <div class="space-y-6">
+                    <div id="progressIndicator" class="flex justify-between mb-8">
                         </div>
-                        <div className="text-green-700 italic">
-                          {exampleResponses[question.id]}
+
+                    <div id="currentStepContent" class="space-y-6 p-6 border-4 rounded-xl border-gray-200 bg-white shadow-lg mt-6">
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Navigation buttons */}
-            <div className="flex justify-between items-center mt-8">
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentStep === 0}
-                className="flex items-center gap-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 rounded-xl p-6 text-lg font-bold shadow-md hover:shadow-lg transition-all"
-              >
-                <ChevronLeft className="w-5 h-5" />
-                Poprzedni
-              </Button>
+                    <div class="flex justify-between items-center mt-8">
+                        <button id="previousButton" class="flex items-center gap-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 rounded-xl p-6 text-lg font-bold shadow-md hover:shadow-lg transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
+                            Poprzedni
+                        </button>
 
-              <div className="text-center">
-                <Button
-                  variant="outline"
-                  onClick={handleReset}
-                  className="flex items-center gap-2 border-2 border-red-300 text-red-600 hover:bg-red-50 rounded-xl p-5 font-bold shadow-md hover:shadow-lg transition-all"
-                >
-                  <RefreshCcw className="w-5 h-5" />
-                  Zacznij od Nowa
-                </Button>
-              </div>
+                        <div class="text-center">
+                            <button id="resetButton" class="flex items-center gap-2 border-2 border-red-300 text-red-600 hover:bg-red-50 rounded-xl p-5 font-bold shadow-md hover:shadow-lg transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-ccw"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.76 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.76-2.74L21 16"/><path d="M21 21v-5h-5"/></svg>
+                                Zacznij od Nowa
+                            </button>
+                        </div>
 
-              <Button
-                onClick={handleNext}
-                disabled={currentStep === steps.length - 1}
-                className={`flex items-center gap-2 text-white hover:opacity-90 rounded-xl p-6 text-lg font-bold shadow-md hover:shadow-lg transition-all ${
-                  steps[currentStep].color
-                }`}
-              >
-                {currentStep === steps.length - 1 ? (
-                  <>
-                    Gotowe! 
-                    <Check className="w-5 h-5 ml-1" />
-                  </>
-                ) : (
-                  <>
-                    Następny 
-                    <ChevronRight className="w-5 h-5" />
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Summary view */}
-      {Object.keys(responses).length > 0 && (
-        <Card className="mt-8 border-4 border-green-400 rounded-xl shadow-xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-green-100 to-teal-100">
-            <CardTitle className="flex items-center gap-2 text-2xl text-green-800">
-              <span className="bg-green-500 text-white p-1 rounded-full">
-                <Check className="w-6 h-6" />
-              </span>
-              Twoja Niesamowita Przygoda z Rozwiązywaniem Problemów! 🎉
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 bg-gradient-to-b from-white to-blue-50">
-            <div className="space-y-8">
-              {steps.map((step, stepIndex) => {
-                const hasResponses = step.questions.some(q => responses[q.id]);
-                
-                return hasResponses && (
-                  <div key={stepIndex} className="space-y-4 bg-white p-4 rounded-xl border-2 border-indigo-100 shadow-md">
-                    <h4 className="text-xl font-bold flex items-center gap-2 text-indigo-700">
-                      <div className={`rounded-full p-2 ${step.color} shadow-sm`}>
-                        <span className="text-xl">{step.emoji}</span>
-                      </div>
-                      {step.title}
-                    </h4>
-                    <div className="space-y-6 pl-6 border-l-4 border-indigo-200">
-                      {step.questions.map((question) => (
-                        responses[question.id] && (
-                          <div key={question.id} className="space-y-2 bg-blue-50 p-4 rounded-xl border-2 border-blue-200">
-                            <div className="font-bold text-blue-800">
-                              {question.text}
-                            </div>
-                            <p className="text-blue-700 whitespace-pre-wrap p-3 bg-white rounded-lg border-2 border-blue-100 shadow-inner text-lg">
-                              {responses[question.id]}
-                            </p>
-                          </div>
-                        )
-                      ))}
+                        <button id="nextButton" class="flex items-center gap-2 text-white hover:opacity-90 rounded-xl p-6 text-lg font-bold shadow-md hover:shadow-lg transition-all bg-pink-500">
+                            Następny
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
                     </div>
-                  </div>
-                );
-              })}
+                </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+        </div>
+
+        <div id="summaryView" class="mt-8 border-4 border-green-400 rounded-xl shadow-xl overflow-hidden hidden">
+            <div class="bg-gradient-to-r from-green-100 to-teal-100">
+                <h2 class="flex items-center gap-2 text-2xl text-green-800 p-6">
+                    <span class="bg-green-500 text-white p-1 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
+                    </span>
+                    Twoja Niesamowita Przygoda z Rozwiązywaniem Problemów! 🎉
+                </h2>
+            </div>
+            <div id="summaryContent" class="p-6 bg-gradient-to-b from-white to-blue-50">
+                </div>
+        </div>
     </div>
-  );
-};
 
-export default PolyaFramework;
+    <script>
+        const steps = [
+            {
+                title: "Zrozumienie Problemu",
+                questions: [
+                    { id: "u1", text: "Co próbujesz znaleźć lub rozwiązać?" },
+                    { id: "u2", text: "Jakie informacje są podane?" },
+                    { id: "u3", text: "Jakie są niewiadome?" },
+                    { id: "u4", text: "Czy możesz przeformułować problem własnymi słowami?" }
+                ],
+                key: "understanding",
+                // icon: Search, // Replaced with emoji/SVG if needed
+                color: "bg-pink-500",
+                emoji: "🔍"
+            },
+            {
+                title: "Opracowanie Planu",
+                questions: [
+                    { id: "p1", text: "Czy widziałeś podobny problem wcześniej?" },
+                    { id: "p2", text: "Czy możesz rozłożyć to na mniejsze kroki?" },
+                    { id: "p3", text: "Jaka strategia może tutaj zadziałać?" },
+                    { id: "p4", text: "Jakie narzędzia lub metody mogą pomóc?" }
+                ],
+                key: "planning",
+                // icon: Lightbulb,
+                color: "bg-yellow-400",
+                emoji: "💡"
+            },
+            {
+                title: "Realizacja Planu",
+                questions: [
+                    { id: "e1", text: "Zapisz każdy krok swojego rozwiązania" },
+                    { id: "e2", text: "Czy jesteś pewien, że każdy krok jest poprawny?" },
+                    { id: "e3", text: "Czy możesz udowodnić, że każdy krok jest poprawny?" },
+                    { id: "e4", text: "Co może pójść nie tak?" }
+                ],
+                key: "execution",
+                // icon: Pencil,
+                color: "bg-teal-500",
+                emoji: "✏️"
+            },
+            {
+                title: "Spojrzenie Wstecz",
+                questions: [
+                    { id: "r1", text: "Czy twoja odpowiedź jest rozsądna?" },
+                    { id: "r2", text: "Czy możesz sprawdzić wynik?" },
+                    { id: "r3", text: "Czy możesz rozwiązać to w inny sposób?" },
+                    { id: "r4", text: "Czego nauczyłeś się z tego problemu?" }
+                ],
+                key: "reflection",
+                // icon: EyeIcon,
+                color: "bg-purple-500",
+                emoji: "👀"
+            }
+        ];
+
+        const sampleProblem = "Maria ma 24 cukierki. Chce je równo podzielić między siebie i przyjaciół na swoim przyjęciu urodzinowym. Jeśli każda osoba dostanie 4 cukierki, ilu przyjaciół Maria może zaprosić na swoje przyjęcie?";
+
+        const exampleResponses = {
+            "u1": "Muszę znaleźć, ilu przyjaciół Maria może zaprosić na swoje przyjęcie.",
+            "u2": "Maria ma łącznie 24 cukierki. Każda osoba (łącznie z Marią) dostaje 4 cukierki.",
+            "u3": "Nie wiem, ilu przyjaciół może zaprosić.",
+            "u4": "Maria dzieli 24 cukierki tak, że każdy dostaje 4 cukierki. Muszę znaleźć, ile osób może dostać cukierki.",
+            "p1": "To jest jak zadanie z dzieleniem! Muszę podzielić łączną liczbę cukierków przez liczbę cukierków dla każdej osoby.",
+            "p2": "Krok 1: Ustalić, ile osób może dostać cukierki.\\nKrok 2: Ponieważ Maria jest jedną z tych osób, liczba przyjaciół jest o jeden mniejsza niż całkowita liczba osób.",
+            "p3": "Podzielę łączną liczbę cukierków przez liczbę cukierków na osobę.",
+            "p4": "Dzielenie pomoże mi rozwiązać ten problem.",
+            "e1": "Łączna liczba cukierków ÷ Cukierki na osobę = Liczba osób\\n24 ÷ 4 = 6 osób\\nPonieważ Maria jest jedną z tych osób, może zaprosić 6 - 1 = 5 przyjaciół.",
+            "e2": "Tak, ponieważ 6 osób × 4 cukierki = 24 cukierki łącznie.",
+            "e3": "Mogę sprawdzić licząc: Maria (4) + Przyjaciel 1 (4) + Przyjaciel 2 (4) + Przyjaciel 3 (4) + Przyjaciel 4 (4) + Przyjaciel 5 (4) = 24 cukierki",
+            "e4": "Mogę zapomnieć odjąć Marię od całkowitej liczby osób.",
+            "r1": "Tak, 5 przyjaciół wydaje się rozsądne dla małego przyjęcia urodzinowego z ograniczoną liczbą cukierków.",
+            "r2": "Mogę rozwiązać to w inny sposób: 24 cukierki - 4 dla Marii = 20 cukierków zostało. Następnie 20 ÷ 4 = 5 przyjaciół.",
+            "r3": "Mogłabym narysować 24 cukierki i zakreślać grupy po 4, aż się skończą, a następnie policzyć grupy i odjąć 1 dla Marii.",
+            "r4": "Nauczyłem się, że w zadaniach z dzieleniem z udziałem ludzi, czasami muszę pamiętać, czy osoba dzieląca jest wliczona do całkowitej liczby osób!"
+        };
+
+        let currentStep = 0;
+        let responses = {};
+        let showExamples = true;
+
+        const progressIndicatorEl = document.getElementById('progressIndicator');
+        const currentStepContentEl = document.getElementById('currentStepContent');
+        const previousButton = document.getElementById('previousButton');
+        const nextButton = document.getElementById('nextButton');
+        const resetButton = document.getElementById('resetButton');
+        const toggleExamplesButton = document.getElementById('toggleExamplesButton');
+        const toggleExamplesText = document.getElementById('toggleExamplesText');
+        const toggleExamplesIconHide = document.getElementById('toggleExamplesIconHide');
+        const toggleExamplesIconShow = document.getElementById('toggleExamplesIconShow');
+        const summaryView = document.getElementById('summaryView');
+        const summaryContent = document.getElementById('summaryContent');
+
+        function renderProgressIndicator() {
+            progressIndicatorEl.innerHTML = steps.map((step, index) => `
+                <button
+                    data-index="${index}"
+                    class="flex-1 text-center relative cursor-pointer hover:opacity-80 transition-transform hover:scale-105 transform ${
+                        index === currentStep ? 'font-bold' : ''
+                    }"
+                >
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="rounded-full w-14 h-14 flex items-center justify-center ${step.color} transition-all duration-300 shadow-md ${
+                            index === currentStep ? 'ring-4 ring-indigo-300 scale-110' : ''
+                        }">
+                            <span class="text-xl">${step.emoji}</span>
+                        </div>
+                        <div class="text-sm mb-1 font-medium mt-1" style="color: ${index === currentStep ? '#4F46E5' : '#6366F1'};">${step.title}</div>
+                    </div>
+                    <div class="h-3 bg-gray-200 rounded-full relative mt-1">
+                        <div
+                            class="absolute left-0 top-0 h-full rounded-full transition-all ${step.color}
+                            ${index <= currentStep ? 'w-full' : 'w-0'}"
+                        />
+                    </div>
+                </button>
+            `).join('');
+
+            // Add event listeners to newly rendered buttons
+            progressIndicatorEl.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    setCurrentStep(parseInt(e.currentTarget.dataset.index));
+                });
+            });
+        }
+
+        function renderCurrentStepContent() {
+            const currentStepData = steps[currentStep];
+            currentStepContentEl.innerHTML = `
+                <div class="flex items-center gap-3 bg-gradient-to-r from-pink-100 to-indigo-100 p-4 rounded-lg">
+                    <div class="rounded-full p-3 ${currentStepData.color} shadow-md">
+                        <span class="text-2xl">${currentStepData.emoji}</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-indigo-800">
+                        Krok ${currentStep + 1}: ${currentStepData.title}
+                    </h3>
+                </div>
+                <div class="space-y-6">
+                    ${currentStepData.questions.map((question, qIndex) => `
+                        <div class="space-y-3 p-4 border-4 border-blue-200 bg-blue-50 rounded-xl shadow-md transition-all hover:shadow-lg">
+                            <div class="font-bold text-indigo-700 flex items-center gap-2">
+                                <span class="bg-indigo-600 text-white rounded-full w-6 h-6 inline-flex items-center justify-center text-sm font-bold">${qIndex + 1}</span>
+                                ${question.text}
+                            </div>
+                            <textarea
+                                id="textarea-${question.id}"
+                                class="w-full h-24 bg-white border-blue-200 rounded-lg shadow-inner text-lg p-2"
+                                placeholder="Napisz tutaj swoją super odpowiedź..."
+                            >${responses[question.id] || ''}</textarea>
+                            ${showExamples && exampleResponses[question.id] ? `
+                                <div class="mt-2 p-3 bg-green-50 border-2 border-green-200 rounded-lg">
+                                    <div class="font-bold text-green-800 mb-1 flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-help-circle"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> Przykładowa Odpowiedź:
+                                    </div>
+                                    <div class="text-green-700 italic whitespace-pre-wrap">
+                                        ${exampleResponses[question.id].replace(/\\n/g, '<br>')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Add event listeners to textareas
+            currentStepData.questions.forEach(question => {
+                const textarea = document.getElementById(`textarea-${question.id}`);
+                if (textarea) {
+                    textarea.addEventListener('input', (e) => handleInputChange(question.id, e.target.value));
+                }
+            });
+            updateNavigationButtons();
+        }
+
+        function renderSummary() {
+            const hasAnyResponse = Object.keys(responses).length > 0;
+            summaryView.classList.toggle('hidden', !hasAnyResponse);
+
+            if (!hasAnyResponse) {
+                summaryContent.innerHTML = '';
+                return;
+            }
+
+            summaryContent.innerHTML = `
+                <div class="space-y-8">
+                    ${steps.map((step, stepIndex) => {
+                        const hasResponsesForStep = step.questions.some(q => responses[q.id]);
+                        if (!hasResponsesForStep) return '';
+
+                        return `
+                            <div class="space-y-4 bg-white p-4 rounded-xl border-2 border-indigo-100 shadow-md">
+                                <h4 class="text-xl font-bold flex items-center gap-2 text-indigo-700">
+                                    <div class="rounded-full p-2 ${step.color} shadow-sm">
+                                        <span class="text-xl">${step.emoji}</span>
+                                    </div>
+                                    ${step.title}
+                                </h4>
+                                <div class="space-y-6 pl-6 border-l-4 border-indigo-200">
+                                    ${step.questions.map(question => `
+                                        ${responses[question.id] ? `
+                                            <div class="space-y-2 bg-blue-50 p-4 rounded-xl border-2 border-blue-200">
+                                                <div class="font-bold text-blue-800">
+                                                    ${question.text}
+                                                </div>
+                                                <p class="text-blue-700 whitespace-pre-wrap p-3 bg-white rounded-lg border-2 border-blue-100 shadow-inner text-lg">
+                                                    ${responses[question.id]}
+                                                </p>
+                                            </div>
+                                        ` : ''}
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function handleInputChange(questionId, value) {
+            responses = {
+                ...responses,
+                [questionId]: value
+            };
+            // No need to re-render everything, just update the value
+            // The value is read directly from the responses object when rendering the textarea
+        }
+
+        function setCurrentStep(stepIndex) {
+            currentStep = stepIndex;
+            renderAll();
+        }
+
+        function handleNext() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderAll();
+            }
+        }
+
+        function handlePrevious() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderAll();
+            }
+        }
+
+        function handleReset() {
+            currentStep = 0;
+            responses = {};
+            renderAll();
+        }
+
+        function handleToggleExamples() {
+            showExamples = !showExamples;
+            toggleExamplesText.textContent = showExamples ? 'Ukryj Przykładowe Odpowiedzi' : 'Pokaż Przykładowe Odpowiedzi';
+            toggleExamplesIconHide.classList.toggle('hidden', !showExamples);
+            toggleExamplesIconShow.classList.toggle('hidden', showExamples);
+            renderCurrentStepContent(); // Re-render to show/hide examples
+        }
+
+        function updateNavigationButtons() {
+            previousButton.disabled = currentStep === 0;
+            nextButton.disabled = currentStep === steps.length - 1;
+
+            if (currentStep === steps.length - 1) {
+                nextButton.innerHTML = `Gotowe! <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>`;
+                nextButton.classList.remove(steps[currentStep].color);
+                nextButton.classList.add('bg-indigo-500'); // Or a final color
+            } else {
+                nextButton.innerHTML = `Następny <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>`;
+                // Remove previous step's color and add current step's color
+                steps.forEach(step => nextButton.classList.remove(step.color));
+                nextButton.classList.add(steps[currentStep].color);
+            }
+        }
+
+        function renderAll() {
+            renderProgressIndicator();
+            renderCurrentStepContent();
+            renderSummary();
+        }
+
+        // Initial render
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAll();
+
+            // Attach event listeners to navigation buttons
+            previousButton.addEventListener('click', handlePrevious);
+            nextButton.addEventListener('click', handleNext);
+            resetButton.addEventListener('click', handleReset);
+            toggleExamplesButton.addEventListener('click', handleToggleExamples);
+        });
+    </script>
+</body>
+</html>
