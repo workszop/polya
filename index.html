@@ -383,6 +383,30 @@
             go('checkpoint');
             assert(STATE.screen === 'checkpoint', 'allowed after assumption');
         });
+        st('PROBLEMS has one exercise and one problem', () => {
+            assert(PROBLEMS.length === 2, 'two problems');
+            assert(PROBLEMS[0].type === 'exercise' && PROBLEMS[1].type === 'problem', 'types');
+        });
+        st('flagship has exactly one crucial question, with unknownReply and no answer', () => {
+            const crucial = FLAGSHIP.infoMenu.filter(q => q.kind === 'crucial');
+            assert(crucial.length === 1, 'exactly one crucial');
+            assert(!crucial[0].answer && crucial[0].unknownReply.length > 0, 'unknownReply, no answer');
+        });
+        st('flagship non-crucial questions all have answers', () => {
+            FLAGSHIP.infoMenu.filter(q => q.kind !== 'crucial')
+                .forEach(q => assert(q.answer && q.answer.length > 0, q.id + ' missing answer'));
+        });
+        st('budget is smaller than the menu', () => {
+            assert(FLAGSHIP.budget >= 2 && FLAGSHIP.budget < FLAGSHIP.infoMenu.length, 'budget sane');
+        });
+        st('gallery has at least 2 personas with distinct assumptions', () => {
+            assert(FLAGSHIP.gallery.length >= 2, 'gallery size');
+            const texts = new Set(FLAGSHIP.gallery.map(p => p.assumption));
+            assert(texts.size === FLAGSHIP.gallery.length, 'distinct assumptions');
+        });
+        st('no em-dashes in authored content', () => {
+            assert(!JSON.stringify(PROBLEMS).includes('—'), 'em-dash found');
+        });
 
         // ─── Constants ───
         const FLOW = ['warmup', 'interstitial', 'investigate', 'checkpoint', 'plan', 'execute', 'lookback', 'summary'];
@@ -403,6 +427,71 @@
                 'placeholder.screen': 'Screen under construction',
             },
         };
+        const PROBLEMS = [
+            {
+                id: 'maria',
+                type: 'exercise',
+                title: 'Rozgrzewka: cukierki Marii',
+                brief: 'Maria ma 24 cukierki. Chce je równo podzielić między siebie i przyjaciół na swoim przyjęciu urodzinowym. Jeśli każda osoba dostanie 4 cukierki, ilu przyjaciół Maria może zaprosić na swoje przyjęcie?',
+                questions: [
+                    { id: 'w1', text: 'Co próbujesz znaleźć?', example: 'Ilu przyjaciół Maria może zaprosić.' },
+                    { id: 'w2', text: 'Jakie dane są podane?', example: '24 cukierki, po 4 dla każdej osoby (razem z Marią).' },
+                    { id: 'w3', text: 'Jaki jest twój plan i wynik?', example: '24 ÷ 4 = 6 osób, minus Maria = 5 przyjaciół.' },
+                ],
+            },
+            {
+                id: 'party',
+                type: 'problem',
+                title: 'Prawdziwy problem: impreza klasowa',
+                brief: 'Twoja klasa dostała 300 zł na imprezę na koniec roku. Impreza będzie w piątek po lekcjach, w waszej sali, i potrwa dwie godziny. Twoim zadaniem jest zaplanować, co kupić.',
+                knownFacts: [
+                    'Budżet: 300 zł',
+                    'Piątek po lekcjach, wasza sala, 2 godziny',
+                    'Lista klasy: 26 osób',
+                ],
+                budget: 3,
+                infoMenu: [
+                    { id: 'q-pizza', kind: 'useful', question: 'Ile kosztuje duża pizza w pobliskiej pizzerii?',
+                      answer: 'Duża pizza kosztuje 40 zł i dzieli się na 8 kawałków.' },
+                    { id: 'q-dishes', kind: 'useful', question: 'Czy szkoła udostępni kubki i talerzyki?',
+                      answer: 'Tak, kubki i talerzyki są w świetlicy za darmo.' },
+                    { id: 'q-count', kind: 'crucial', question: 'Ile osób przyjdzie na imprezę?',
+                      unknownReply: 'Tego nikt nie wie. Na liście klasy jest 26 osób, ale nie wiadomo, ile naprawdę przyjdzie. Musisz coś założyć – i zapisać swoje założenie.' },
+                    { id: 'q-color', kind: 'herring', question: 'Jaki jest ulubiony kolor wychowawczyni?',
+                      answer: 'Podobno niebieski. Ciekawe... ale czy to pomaga w planowaniu zakupów?' },
+                    { id: 'q-drinks', kind: 'useful', question: 'Ile kosztują napoje?',
+                      answer: 'Butelka soku 1,5 l kosztuje 8 zł i wystarcza dla około 5 osób.' },
+                    { id: 'q-rain', kind: 'herring', question: 'Czy w piątek będzie padać?',
+                      answer: 'Prognoza mówi: może. Ale impreza jest w sali, więc pogoda niewiele zmienia.' },
+                    { id: 'q-allergy', kind: 'useful', question: 'Czy ktoś w klasie ma alergie pokarmowe?',
+                      answer: 'Dwie osoby nie jedzą glutenu.' },
+                    { id: 'q-history', kind: 'herring', question: 'Ile imprez klasowych było w zeszłym roku?',
+                      answer: 'Trzy. Historia bywa pouczająca, ale tutaj niewiele wnosi.' },
+                ],
+                gapPrompt: 'Na ile osób właściwie planujesz? Sprawdź swoje notatki – tej liczby nigdzie nie ma. Zanim policzysz cokolwiek, zapisz swoje założenie.',
+                planPrompts: [
+                    { id: 'p1', text: 'Jaka jest twoja strategia? Od czego zaczniesz?' },
+                    { id: 'p2', text: 'Które z twoich założeń najbardziej wpływa na plan? Co się stanie, jeśli będzie błędne?' },
+                ],
+                sensitivity: [
+                    { id: 's1', text: 'Co jeśli przyjdzie tylko 12 osób? Czy twój plan się broni? Co zrobisz z nadmiarem?' },
+                    { id: 's2', text: 'Co jeśli przyjdą wszyscy z listy (26 osób), a do tego ktoś przyprowadzi rodzeństwo?' },
+                ],
+                gallery: [
+                    { name: 'Ola', assumption: 'Przyjdzie około 20 osób – zwykle przychodzi jakieś 75% klasy.',
+                      solution: '5 pizz (200 zł) + 4 soki (32 zł) = 232 zł. Zostawiam 68 zł rezerwy na niespodzianki.',
+                      result: 'Plan z rezerwą: 232 zł wydane, 68 zł w zapasie.' },
+                    { name: 'Bartek', assumption: 'Przyjdą wszyscy (26 osób) – lepiej mieć za dużo niż za mało.',
+                      solution: '6 pizz (240 zł) + 6 soków (48 zł) = 288 zł. Prawie cały budżet, bez rezerwy – świadomie.',
+                      result: 'Plan na maksa: 288 zł, ryzyko braku rezerwy przyjęte.' },
+                    { name: 'Marta', assumption: 'Zapytałam wszystkich o potwierdzenie do środy – zebrałam 16 potwierdzeń.',
+                      solution: '4 pizze (160 zł) + 4 soki (32 zł) + przekąski bezglutenowe (40 zł) = 232 zł.',
+                      result: 'Plan na pewniaka: zmieniłam problem, zdobywając brakującą informację.' },
+                ],
+            },
+        ];
+        const WARMUP = PROBLEMS[0];
+        const FLAGSHIP = PROBLEMS[1];
 
         // ─── State ───
         function freshState() {
