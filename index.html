@@ -482,6 +482,27 @@
             assert(screenRoot.innerHTML.includes('Duża pizza kosztuje 40'), 'asked answer shown');
             assert(!screenRoot.innerHTML.includes('kubki i talerzyki są w świetlicy'), 'unasked answer hidden');
         });
+        st('checkpoint warns when the crucial gap is unnoticed', () => {
+            STATE.screen = 'checkpoint';       // arrived without asking q-count
+            TESTING = false; renderAll(); TESTING = true;
+            assert(screenRoot.innerHTML.includes(FLAGSHIP.gapPrompt), 'gap prompt shown');
+            assert(screenRoot.querySelector('#assumption-input'), 'assumption form shown');
+        });
+        st('checkpoint passes straight through when assumption exists', () => {
+            STATE.ledger.push({ id: 'a1', text: 'przyjdzie 20 osób' });
+            STATE.screen = 'checkpoint';
+            TESTING = false; renderAll(); TESTING = true;
+            assert(!screenRoot.innerHTML.includes(FLAGSHIP.gapPrompt), 'no gap prompt');
+            assert(screenRoot.querySelector('[data-action="to-plan"]'), 'continue CTA');
+        });
+        st('execute requires a ledger entry (guard) and renders structured answer', () => {
+            assert(!canEnter('execute'), 'blocked without ledger');
+            STATE.ledger.push({ id: 'a1', text: 'przyjdzie 20 osób' });
+            STATE.screen = 'execute';
+            TESTING = false; renderAll(); TESTING = true;
+            assert(screenRoot.innerHTML.includes('Zakładając, że'), 'structured answer frame');
+            assert(screenRoot.innerHTML.includes('przyjdzie 20 osób'), 'ledger pinned');
+        });
 
         // ─── Constants ───
         const FLOW = ['warmup', 'interstitial', 'investigate', 'checkpoint', 'plan', 'execute', 'lookback', 'summary'];
@@ -506,6 +527,17 @@
                 'inv.budgetLeft': 'Pozostałe pytania: {n}',
                 'inv.assumptionPrompt': 'Zapisz swoje założenie, żeby móc iść dalej:',
                 'inv.next': 'Mam dość informacji – planuję',
+                'chk.title': 'Zanim zaczniesz planować...',
+                'chk.question': 'Czy masz wszystko, czego potrzebujesz, żeby policzyć odpowiedź?',
+                'chk.ok': 'Masz zapisane założenie – możesz planować.',
+                'chk.continue': 'Planuję',
+                'plan.eyebrow': 'Krok 2 · Opracowanie Planu',
+                'exec.eyebrow': 'Krok 3 · Realizacja Planu',
+                'exec.work': 'Twoje obliczenia i notatki',
+                'exec.answerFrame': 'Zakładając, że...',
+                'exec.answerLabel': '...moja odpowiedź to:',
+                'exec.next': 'Sprawdzam swój plan',
+                'plan.next': 'Realizuję plan',
             },
             en: {
                 'nav.next': 'Next', 'nav.prev': 'Previous', 'nav.reset': 'Start over',
@@ -526,6 +558,17 @@
                 'inv.budgetLeft': 'Questions left: {n}',
                 'inv.assumptionPrompt': 'Write down your assumption to move on:',
                 'inv.next': 'I have enough – let me plan',
+                'chk.title': 'Before you plan...',
+                'chk.question': 'Do you have everything you need to compute an answer?',
+                'chk.ok': 'You have an assumption on record – go plan.',
+                'chk.continue': 'Let me plan',
+                'plan.eyebrow': 'Step 2 · Devise a Plan',
+                'exec.eyebrow': 'Step 3 · Carry Out the Plan',
+                'exec.work': 'Your calculations and notes',
+                'exec.answerFrame': 'Assuming that...',
+                'exec.answerLabel': '...my answer is:',
+                'exec.next': 'Check my plan',
+                'plan.next': 'Carry out the plan',
             },
         };
         const PROBLEMS = [
@@ -780,6 +823,93 @@
             if (addBtn) addBtn.addEventListener('click', () =>
                 addAssumption(document.getElementById('assumption-input').value));
             screenRoot.querySelector('[data-action="to-checkpoint"]').addEventListener('click', () => go('checkpoint'));
+        };
+
+        RENDER.checkpoint = () => {
+            const gapUnnoticed = STATE.ledger.length === 0;
+            screenRoot.innerHTML = `
+                <section class="card">
+                    <div class="card-eyebrow"><span class="edu-overline">${t('chk.title')}</span></div>
+                    <h3 class="edu-h3">${t('chk.question')}</h3>
+                    ${gapUnnoticed ? `
+                        <div class="hint-note" style="margin-top:16px"><p><strong>${FLAGSHIP.gapPrompt}</strong></p></div>
+                        <div class="question-panel question-enter" style="margin-top:14px">
+                            <textarea class="answer" id="assumption-input" style="min-height:64px"></textarea>
+                            <button type="button" class="edu-btn edu-btn-sm" data-action="add-assumption">${t('ledger.add')}</button>
+                        </div>` : `
+                        <p class="edu-p" style="margin-top:12px">${t('chk.ok')}</p>`}
+                    <div class="question-nav" style="margin-top:20px">
+                        <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
+                        <button type="button" class="edu-btn" data-action="to-plan" ${STATE.ledger.length ? '' : 'disabled'}>${t('chk.continue')} →</button>
+                    </div>
+                </section>`;
+            const addBtn = screenRoot.querySelector('[data-action="add-assumption"]');
+            if (addBtn) addBtn.addEventListener('click', () =>
+                addAssumption(document.getElementById('assumption-input').value));
+            screenRoot.querySelector('[data-action="back"]').addEventListener('click', () => go('investigate'));
+            screenRoot.querySelector('[data-action="to-plan"]').addEventListener('click', () => go('plan'));
+        };
+
+        RENDER.plan = () => {
+            screenRoot.innerHTML = `
+                <section class="card">
+                    <div class="card-eyebrow"><span class="edu-overline">${t('plan.eyebrow')}</span></div>
+                    <div class="inv-layout">
+                        <div>
+                            ${FLAGSHIP.planPrompts.map((p, i) => `
+                                <div class="question-panel" style="margin-top:${i ? '14px' : '0'}">
+                                    <div class="question-title">
+                                        <span class="question-number">${i + 1}</span>
+                                        <span class="question-text">${p.text}</span>
+                                    </div>
+                                    <textarea class="answer" data-plan="${p.id}">${escapeHtml(STATE.plan.responses[p.id] || '')}</textarea>
+                                </div>`).join('')}
+                            <div class="question-nav" style="margin-top:20px">
+                                <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
+                                <button type="button" class="edu-btn" data-action="to-execute">${t('plan.next')} →</button>
+                            </div>
+                        </div>
+                        ${renderLedgerPanel()}
+                    </div>
+                </section>`;
+            screenRoot.querySelectorAll('[data-plan]').forEach(area =>
+                area.addEventListener('input', e => { STATE.plan.responses[area.dataset.plan] = e.target.value; persist(); }));
+            screenRoot.querySelector('[data-action="back"]').addEventListener('click', () => go('checkpoint'));
+            screenRoot.querySelector('[data-action="to-execute"]').addEventListener('click', () => go('execute'));
+        };
+
+        RENDER.execute = () => {
+            const assumptions = STATE.ledger.map(a => escapeHtml(a.text)).join('; ');
+            screenRoot.innerHTML = `
+                <section class="card">
+                    <div class="card-eyebrow"><span class="edu-overline">${t('exec.eyebrow')}</span></div>
+                    <div class="inv-layout">
+                        <div>
+                            <div class="question-panel">
+                                <span class="question-text">${t('exec.work')}</span>
+                                <textarea class="answer" id="exec-work" style="min-height:170px">${escapeHtml(STATE.execute.work)}</textarea>
+                            </div>
+                            <div class="question-panel" style="margin-top:14px">
+                                <span class="question-text">${t('exec.answerFrame')}</span>
+                                <p class="edu-small" style="font-style:italic">${assumptions}</p>
+                                <span class="question-text">${t('exec.answerLabel')}</span>
+                                <textarea class="answer" id="exec-answer" style="min-height:64px">${escapeHtml(STATE.execute.answer)}</textarea>
+                            </div>
+                            <div class="question-nav" style="margin-top:20px">
+                                <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
+                                <button type="button" class="edu-btn" data-action="to-lookback" ${STATE.execute.answer.trim() ? '' : 'disabled'}>${t('exec.next')} →</button>
+                            </div>
+                        </div>
+                        ${renderLedgerPanel()}
+                    </div>
+                </section>`;
+            screenRoot.querySelector('#exec-work').addEventListener('input', e => { STATE.execute.work = e.target.value; persist(); });
+            screenRoot.querySelector('#exec-answer').addEventListener('input', e => {
+                STATE.execute.answer = e.target.value; persist();
+                screenRoot.querySelector('[data-action="to-lookback"]').disabled = !e.target.value.trim();
+            });
+            screenRoot.querySelector('[data-action="back"]').addEventListener('click', () => go('plan'));
+            screenRoot.querySelector('[data-action="to-lookback"]').addEventListener('click', () => go('lookback'));
         };
 
         function renderAll() { RENDER[STATE.screen](); }
