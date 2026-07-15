@@ -234,6 +234,12 @@
         textarea.answer::placeholder { color: var(--ink-3); }
         textarea.answer:focus { border-color: var(--marigold); }
 
+        .persona-card { background: var(--surface); border: 1px solid var(--line);
+                        border-radius: var(--r-lg); padding: 18px 20px; margin-top: 12px; }
+        .persona-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--ink); }
+        .persona-field { margin-top: 8px; font-size: 14.5px; color: var(--ink-2); }
+        .persona-field .edu-overline { display: block; margin-bottom: 2px; }
+
         .example-block { border-top: 1px solid var(--line); padding-top: 16px; }
         .example-toggle {
             display: inline-flex; align-items: center; gap: 8px;
@@ -503,6 +509,22 @@
             assert(screenRoot.innerHTML.includes('Zakładając, że'), 'structured answer frame');
             assert(screenRoot.innerHTML.includes('przyjdzie 20 osób'), 'ledger pinned');
         });
+        st('lookback renders sensitivity challenges and hides gallery initially', () => {
+            STATE.screen = 'lookback';
+            TESTING = false; renderAll(); TESTING = true;
+            assert(screenRoot.innerHTML.includes(FLAGSHIP.sensitivity[0].text), 'challenge 1');
+            assert(!screenRoot.innerHTML.includes('Ola'), 'gallery hidden');
+        });
+        st('gallery reveals all personas with assumptions and results', () => {
+            STATE.screen = 'lookback';
+            STATE.lookback.galleryRevealed = true;
+            TESTING = false; renderAll(); TESTING = true;
+            FLAGSHIP.gallery.forEach(p => {
+                assert(screenRoot.innerHTML.includes(p.name), p.name);
+                assert(screenRoot.innerHTML.includes(escapeHtml(p.assumption).slice(0, 20)), p.name + ' assumption');
+            });
+            assert(screenRoot.querySelector('#reflection-input'), 'reflection prompt shown');
+        });
 
         // ─── Constants ───
         const FLOW = ['warmup', 'interstitial', 'investigate', 'checkpoint', 'plan', 'execute', 'lookback', 'summary'];
@@ -538,6 +560,15 @@
                 'exec.answerLabel': '...moja odpowiedź to:',
                 'exec.next': 'Sprawdzam swój plan',
                 'plan.next': 'Realizuję plan',
+                'look.eyebrow': 'Krok 4 · Spojrzenie Wstecz',
+                'look.sensTitle': 'Sprawdź wytrzymałość swojego planu',
+                'look.galleryCta': 'Zobacz, jak rozwiązali to inni',
+                'look.galleryTitle': 'Trzy różne odpowiedzi. Wszystkie dobre.',
+                'look.galleryNote': 'Każda osoba przyjęła inne założenie i dostała inny wynik. Żadna się nie myli – każda odpowiedź jest dobra przy swoich założeniach.',
+                'look.personaAssumption': 'Założenie',
+                'look.personaResult': 'Wynik',
+                'look.reflection': 'Co ten problem miał w sobie, czego nie ma zadanie szkolne?',
+                'look.next': 'Pokaż podsumowanie',
             },
             en: {
                 'nav.next': 'Next', 'nav.prev': 'Previous', 'nav.reset': 'Start over',
@@ -569,6 +600,15 @@
                 'exec.answerLabel': '...my answer is:',
                 'exec.next': 'Check my plan',
                 'plan.next': 'Carry out the plan',
+                'look.eyebrow': 'Step 4 · Look Back',
+                'look.sensTitle': 'Stress-test your plan',
+                'look.galleryCta': 'See how others solved it',
+                'look.galleryTitle': 'Three different answers. All of them good.',
+                'look.galleryNote': 'Each person made a different assumption and got a different result. Nobody is wrong – each answer is right given its assumptions.',
+                'look.personaAssumption': 'Assumption',
+                'look.personaResult': 'Result',
+                'look.reflection': 'What did this problem have that a school exercise does not?',
+                'look.next': 'Show the summary',
             },
         };
         const PROBLEMS = [
@@ -910,6 +950,54 @@
             });
             screenRoot.querySelector('[data-action="back"]').addEventListener('click', () => go('plan'));
             screenRoot.querySelector('[data-action="to-lookback"]').addEventListener('click', () => go('lookback'));
+        };
+
+        RENDER.lookback = () => {
+            const lb = STATE.lookback;
+            screenRoot.innerHTML = `
+                <section class="card">
+                    <div class="card-eyebrow"><span class="edu-overline">${t('look.eyebrow')}</span></div>
+                    <h3 class="edu-h3">${t('look.sensTitle')}</h3>
+                    ${FLAGSHIP.sensitivity.map((s, i) => `
+                        <div class="question-panel" style="margin-top:14px">
+                            <div class="question-title">
+                                <span class="question-number">${i + 1}</span>
+                                <span class="question-text">${s.text}</span>
+                            </div>
+                            <textarea class="answer" data-sens="${s.id}" style="min-height:80px">${escapeHtml(lb.reactions[s.id] || '')}</textarea>
+                        </div>`).join('')}
+                    ${lb.galleryRevealed ? `
+                        <h3 class="edu-h3" style="margin-top:26px">${t('look.galleryTitle')}</h3>
+                        <p class="edu-p" style="margin-top:6px">${t('look.galleryNote')}</p>
+                        ${FLAGSHIP.gallery.map(p => `
+                            <div class="persona-card question-enter">
+                                <div class="persona-name">${p.name}</div>
+                                <div class="persona-field"><span class="edu-overline">${t('look.personaAssumption')}</span>${escapeHtml(p.assumption)}</div>
+                                <div class="persona-field">${escapeHtml(p.solution)}</div>
+                                <div class="persona-field"><span class="edu-overline">${t('look.personaResult')}</span>${escapeHtml(p.result)}</div>
+                            </div>`).join('')}
+                        <div class="question-panel" style="margin-top:22px">
+                            <span class="question-text">${t('look.reflection')}</span>
+                            <textarea class="answer" id="reflection-input" style="min-height:80px">${escapeHtml(lb.reflection)}</textarea>
+                        </div>
+                        <div class="question-nav" style="margin-top:20px">
+                            <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
+                            <button type="button" class="edu-btn" data-action="to-summary">${t('look.next')} →</button>
+                        </div>` : `
+                        <div class="question-nav" style="margin-top:20px">
+                            <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
+                            <button type="button" class="edu-btn" data-action="reveal-gallery">${t('look.galleryCta')}</button>
+                        </div>`}
+                </section>`;
+            screenRoot.querySelectorAll('[data-sens]').forEach(area =>
+                area.addEventListener('input', e => { STATE.lookback.reactions[area.dataset.sens] = e.target.value; persist(); }));
+            const reveal = screenRoot.querySelector('[data-action="reveal-gallery"]');
+            if (reveal) reveal.addEventListener('click', () => { STATE.lookback.galleryRevealed = true; persist(); renderAll(); });
+            const refl = screenRoot.querySelector('#reflection-input');
+            if (refl) refl.addEventListener('input', e => { STATE.lookback.reflection = e.target.value; persist(); });
+            screenRoot.querySelector('[data-action="back"]').addEventListener('click', () => go('execute'));
+            const toSummary = screenRoot.querySelector('[data-action="to-summary"]');
+            if (toSummary) toSummary.addEventListener('click', () => go('summary'));
         };
 
         function renderAll() { RENDER[STATE.screen](); }
