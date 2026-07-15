@@ -14,6 +14,13 @@
         textarea {
             resize: vertical; /* Allows vertical resizing */
         }
+        .question-enter {
+            animation: question-enter 180ms ease-out;
+        }
+        @keyframes question-enter {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -30,12 +37,9 @@
                 <div id="sampleProblem" class="text-xl text-center font-bold text-amber-800 p-4 border-2 border-dashed border-amber-300 rounded-lg bg-amber-50">
                     Maria ma 24 cukierki. Chce je równo podzielić między siebie i przyjaciół na swoim przyjęciu urodzinowym. Jeśli każda osoba dostanie 4 cukierki, ilu przyjaciół Maria może zaprosić na swoje przyjęcie?
                 </div>
-                <div class="flex justify-center mt-4">
-                    <button id="toggleExamplesButton" class="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white rounded-full px-6 py-2 shadow-md">
-                        <span id="toggleExamplesText">Ukryj Przykładowe Odpowiedzi</span>
-                        <svg id="toggleExamplesIconHide" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                        <svg id="toggleExamplesIconShow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-help-circle hidden"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-                    </button>
+                <div class="flex items-start gap-3 mt-4 p-3 bg-white border-2 border-amber-200 rounded-lg text-amber-800">
+                    <svg class="flex-none mt-0.5" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    <p><strong>Najpierw spróbuj samodzielnie.</strong> Przykładową odpowiedź możesz odkryć osobno przy każdym pytaniu.</p>
                 </div>
             </div>
         </div>
@@ -169,19 +173,26 @@
 
         let currentStep = 0;
         let responses = {};
-        let showExamples = true;
+        let currentQuestionByStep = steps.map(() => 0);
+        let revealedExamples = {};
 
         const progressIndicatorEl = document.getElementById('progressIndicator');
         const currentStepContentEl = document.getElementById('currentStepContent');
         const previousButton = document.getElementById('previousButton');
         const nextButton = document.getElementById('nextButton');
         const resetButton = document.getElementById('resetButton');
-        const toggleExamplesButton = document.getElementById('toggleExamplesButton');
-        const toggleExamplesText = document.getElementById('toggleExamplesText');
-        const toggleExamplesIconHide = document.getElementById('toggleExamplesIconHide');
-        const toggleExamplesIconShow = document.getElementById('toggleExamplesIconShow');
         const summaryView = document.getElementById('summaryView');
         const summaryContent = document.getElementById('summaryContent');
+
+        function escapeHtml(value) {
+            return value.replace(/[&<>"']/g, character => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            })[character]);
+        }
 
         function renderProgressIndicator() {
             progressIndicatorEl.innerHTML = steps.map((step, index) => `
@@ -218,6 +229,9 @@
 
         function renderCurrentStepContent() {
             const currentStepData = steps[currentStep];
+            const currentQuestionIndex = currentQuestionByStep[currentStep];
+            const question = currentStepData.questions[currentQuestionIndex];
+            const isExampleRevealed = revealedExamples[question.id];
             currentStepContentEl.innerHTML = `
                 <div class="flex items-center gap-3 bg-gradient-to-r from-pink-100 to-indigo-100 p-4 rounded-lg">
                     <div class="rounded-full p-3 ${currentStepData.color} shadow-md">
@@ -227,40 +241,109 @@
                         Krok ${currentStep + 1}: ${currentStepData.title}
                     </h3>
                 </div>
-                <div class="space-y-6">
-                    ${currentStepData.questions.map((question, qIndex) => `
-                        <div class="space-y-3 p-4 border-4 border-blue-200 bg-blue-50 rounded-xl shadow-md transition-all hover:shadow-lg">
-                            <div class="font-bold text-indigo-700 flex items-center gap-2">
-                                <span class="bg-indigo-600 text-white rounded-full w-6 h-6 inline-flex items-center justify-center text-sm font-bold">${qIndex + 1}</span>
-                                ${question.text}
-                            </div>
-                            <textarea
-                                id="textarea-${question.id}"
-                                class="w-full h-24 bg-white border-blue-200 rounded-lg shadow-inner text-lg p-2"
-                                placeholder="Napisz tutaj swoją super odpowiedź..."
-                            >${responses[question.id] || ''}</textarea>
-                            ${showExamples && exampleResponses[question.id] ? `
-                                <div class="mt-2 p-3 bg-green-50 border-2 border-green-200 rounded-lg">
-                                    <div class="font-bold text-green-800 mb-1 flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-help-circle"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> Przykładowa Odpowiedź:
-                                    </div>
-                                    <div class="text-green-700 italic whitespace-pre-wrap">
-                                        ${exampleResponses[question.id].replace(/\\n/g, '<br>')}
-                                    </div>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-indigo-50 rounded-lg border-2 border-indigo-100">
+                    <div>
+                        <div class="text-xs uppercase tracking-wide font-bold text-indigo-500">Postęp w tym kroku</div>
+                        <div class="font-bold text-indigo-800">Pytanie ${currentQuestionIndex + 1} z ${currentStepData.questions.length}</div>
+                    </div>
+                    <div class="flex flex-wrap gap-2" role="navigation" aria-label="Pytania w kroku ${currentStep + 1}">
+                        ${currentStepData.questions.map((item, index) => {
+                            const isCurrent = index === currentQuestionIndex;
+                            const isAnswered = Boolean(responses[item.id]);
+                            return `
+                                <button
+                                    type="button"
+                                    data-question-index="${index}"
+                                    class="w-9 h-9 rounded-full font-bold transition-all ${
+                                        isCurrent
+                                            ? 'bg-indigo-600 text-white ring-4 ring-indigo-200'
+                                            : isAnswered
+                                                ? 'bg-green-500 text-white hover:bg-green-600'
+                                                : 'bg-white text-indigo-600 border-2 border-indigo-200 hover:border-indigo-400'
+                                    }"
+                                    aria-label="Pytanie ${index + 1}${isAnswered ? ', odpowiedź zapisana' : ''}"
+                                    ${isCurrent ? 'aria-current="true"' : ''}
+                                >${isAnswered && !isCurrent ? '✓' : index + 1}</button>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                <div class="question-enter space-y-4 p-5 border-4 border-blue-200 bg-blue-50 rounded-xl shadow-md">
+                    <div class="font-bold text-indigo-700 flex items-start gap-3 text-lg">
+                        <span class="flex-none bg-indigo-600 text-white rounded-full w-8 h-8 inline-flex items-center justify-center text-sm font-bold">${currentQuestionIndex + 1}</span>
+                        <span>${question.text}</span>
+                    </div>
+                    <textarea
+                        id="textarea-${question.id}"
+                        class="w-full h-32 bg-white border-2 border-blue-200 rounded-lg shadow-inner text-lg p-3 focus:border-indigo-400 focus:outline-none"
+                        placeholder="Napisz tutaj swoją super odpowiedź..."
+                    >${escapeHtml(responses[question.id] || '')}</textarea>
+
+                    <div class="border-t-2 border-blue-100 pt-4">
+                        <button
+                            type="button"
+                            data-toggle-example="${question.id}"
+                            class="inline-flex items-center gap-2 font-bold rounded-full px-4 py-2 transition-all ${
+                                isExampleRevealed
+                                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                    : 'bg-white text-green-700 border-2 border-green-300 hover:bg-green-50'
+                            }"
+                            aria-expanded="${Boolean(isExampleRevealed)}"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                            ${isExampleRevealed ? 'Ukryj przykładową odpowiedź' : 'Pokaż przykładową odpowiedź'}
+                        </button>
+                        ${isExampleRevealed && exampleResponses[question.id] ? `
+                            <div class="question-enter mt-3 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
+                                <div class="font-bold text-green-800 mb-2">Przykładowa odpowiedź — porównaj ją ze swoją:</div>
+                                <div class="text-green-700 italic whitespace-pre-wrap">
+                                    ${exampleResponses[question.id].replace(/\\n/g, '<br>')}
                                 </div>
-                            ` : ''}
-                        </div>
-                    `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3 pt-2">
+                        <button
+                            type="button"
+                            data-question-action="previous"
+                            class="rounded-lg px-4 py-2 font-bold text-indigo-600 bg-white border-2 border-indigo-200 hover:bg-indigo-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            ${currentQuestionIndex === 0 ? 'disabled' : ''}
+                        >← Poprzednie pytanie</button>
+                        <button
+                            type="button"
+                            data-question-action="next"
+                            class="rounded-lg px-4 py-2 font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                            ${currentQuestionIndex === currentStepData.questions.length - 1 ? 'disabled' : ''}
+                        >Następne pytanie →</button>
+                    </div>
                 </div>
             `;
 
-            // Add event listeners to textareas
-            currentStepData.questions.forEach(question => {
-                const textarea = document.getElementById(`textarea-${question.id}`);
-                if (textarea) {
-                    textarea.addEventListener('input', (e) => handleInputChange(question.id, e.target.value));
-                }
+            const textarea = document.getElementById(`textarea-${question.id}`);
+            textarea.addEventListener('input', (event) => handleInputChange(question.id, event.target.value));
+
+            currentStepContentEl.querySelectorAll('[data-question-index]').forEach(button => {
+                button.addEventListener('click', () => {
+                    currentQuestionByStep[currentStep] = Number(button.dataset.questionIndex);
+                    renderCurrentStepContent();
+                });
             });
+
+            currentStepContentEl.querySelectorAll('[data-question-action]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const direction = button.dataset.questionAction === 'next' ? 1 : -1;
+                    currentQuestionByStep[currentStep] += direction;
+                    renderCurrentStepContent();
+                });
+            });
+
+            currentStepContentEl.querySelector('[data-toggle-example]').addEventListener('click', (event) => {
+                const questionId = event.currentTarget.dataset.toggleExample;
+                revealedExamples[questionId] = !revealedExamples[questionId];
+                renderCurrentStepContent();
+            });
+
             updateNavigationButtons();
         }
 
@@ -295,7 +378,7 @@
                                                     ${question.text}
                                                 </div>
                                                 <p class="text-blue-700 whitespace-pre-wrap p-3 bg-white rounded-lg border-2 border-blue-100 shadow-inner text-lg">
-                                                    ${responses[question.id]}
+                                                    ${escapeHtml(responses[question.id])}
                                                 </p>
                                             </div>
                                         ` : ''}
@@ -309,12 +392,13 @@
         }
 
         function handleInputChange(questionId, value) {
-            responses = {
-                ...responses,
-                [questionId]: value
-            };
-            // No need to re-render everything, just update the value
-            // The value is read directly from the responses object when rendering the textarea
+            if (value.trim()) {
+                responses[questionId] = value;
+            } else {
+                delete responses[questionId];
+            }
+
+            renderSummary();
         }
 
         function setCurrentStep(stepIndex) {
@@ -339,15 +423,9 @@
         function handleReset() {
             currentStep = 0;
             responses = {};
+            currentQuestionByStep = steps.map(() => 0);
+            revealedExamples = {};
             renderAll();
-        }
-
-        function handleToggleExamples() {
-            showExamples = !showExamples;
-            toggleExamplesText.textContent = showExamples ? 'Ukryj Przykładowe Odpowiedzi' : 'Pokaż Przykładowe Odpowiedzi';
-            toggleExamplesIconHide.classList.toggle('hidden', !showExamples);
-            toggleExamplesIconShow.classList.toggle('hidden', showExamples);
-            renderCurrentStepContent(); // Re-render to show/hide examples
         }
 
         function updateNavigationButtons() {
@@ -380,7 +458,6 @@
             previousButton.addEventListener('click', handlePrevious);
             nextButton.addEventListener('click', handleNext);
             resetButton.addEventListener('click', handleReset);
-            toggleExamplesButton.addEventListener('click', handleToggleExamples);
         });
     </script>
 </body>
