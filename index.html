@@ -297,6 +297,8 @@
         .summary-response { white-space: pre-wrap; color: var(--ink-2); font-size: 15px; line-height: 1.6; }
 
         .hidden { display: none; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+                   overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
         .question-enter { animation: question-enter 180ms ease-out; }
         @keyframes question-enter {
@@ -330,138 +332,96 @@
             <p class="edu-lead">Przejdź przez cztery kroki metody George'a Pólyi: zrozum problem, opracuj plan, zrealizuj go i spójrz wstecz. Odpowiadaj na pytania pomocnicze, a na końcu zobaczysz podsumowanie swojej pracy.</p>
         </header>
 
-        <section class="card" aria-labelledby="problemHeading">
-            <div class="card-eyebrow">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                <span id="problemHeading" class="edu-overline">Przykładowy problem</span>
-            </div>
-            <div id="sampleProblem" class="problem-well">
-                Maria ma 24 cukierki. Chce je równo podzielić między siebie i przyjaciół na swoim przyjęciu urodzinowym. Jeśli każda osoba dostanie 4 cukierki, ilu przyjaciół Maria może zaprosić na swoje przyjęcie?
-            </div>
-            <div class="hint-note">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                <p><strong>Najpierw spróbuj samodzielnie.</strong> Przykładową odpowiedź możesz odkryć osobno przy każdym pytaniu.</p>
-            </div>
-        </section>
-
-        <section class="card" aria-label="Kroki metody Pólyi">
-            <div id="progressIndicator" class="progress-row"></div>
-            <div id="currentStepContent"></div>
-            <div class="main-nav">
-                <button id="previousButton" class="edu-btn-ghost">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                    Poprzedni
-                </button>
-                <button id="resetButton" class="edu-btn-ghost is-danger edu-btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.76 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.76-2.74L21 16"/><path d="M21 21v-5h-5"/></svg>
-                    Zacznij od nowa
-                </button>
-                <button id="nextButton" class="edu-btn">
-                    Następny
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                </button>
-            </div>
-        </section>
-
-        <section id="summaryView" class="card hidden" aria-labelledby="summaryHeading">
-            <div class="summary-head">
-                <span class="summary-check">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                </span>
-                <h2 id="summaryHeading">Twoja przygoda z rozwiązywaniem problemów</h2>
-            </div>
-            <div id="summaryContent"></div>
-        </section>
+        <div id="liveRegion" class="sr-only" aria-live="polite"></div>
+        <div id="screenRoot"></div>
     </main>
 
     <script>
+        // ─── Self-test harness ───
+        const TESTS = [];
+        let TESTING = false;
+        function st(name, fn) { TESTS.push([name, fn]); }
+        function assert(cond, msg) { if (!cond) throw new Error(msg || 'assertion failed'); }
+        function runSelfTests() {
+            const results = TESTS.map(([name, fn]) => {
+                STATE = freshState();
+                TESTING = true;   // a failing test must not leak TESTING=false into the next one
+                try { fn(); return { name, ok: true, err: '' }; }
+                catch (e) { return { name, ok: false, err: String(e) }; }
+            });
+            document.body.innerHTML = '<ol id="selftest">' + results.map(r =>
+                `<li data-st="${r.ok ? 'PASS' : 'FAIL'}">${r.ok ? 'PASS' : 'FAIL'}: ${escapeHtml(r.name)}${r.err ? ' – ' + escapeHtml(r.err) : ''}</li>`
+            ).join('') + '</ol>';
+        }
+
+        st('t() returns pl string, falls back to key', () => {
+            STATE.lang = 'pl';
+            assert(t('nav.next') === 'Następny', 'pl lookup');
+            STATE.lang = 'en';
+            assert(t('nav.next') === 'Next', 'en lookup');
+            assert(t('no.such.key') === 'no.such.key', 'key fallback');
+        });
+        st('initial screen is warmup', () => {
+            assert(STATE.screen === 'warmup', 'got ' + STATE.screen);
+        });
+        st('go() follows FLOW and blocks guarded screens', () => {
+            go('interstitial');
+            assert(STATE.screen === 'interstitial', 'interstitial');
+            go('execute');   // guard: needs ledger entry
+            assert(STATE.screen !== 'execute', 'execute must be blocked without ledger entry');
+            STATE.ledger.push({ id: 'a1', text: 'testowe założenie' });
+            go('execute');
+            assert(STATE.screen === 'execute', 'execute allowed with ledger entry');
+        });
+        st('investigate exit is blocked after crucial question until assumption logged', () => {
+            STATE.screen = 'investigate';
+            STATE.investigation.asked.push('q-crucial');
+            STATE.investigation.crucialAsked = true;
+            go('checkpoint');
+            assert(STATE.screen === 'investigate', 'blocked');
+            STATE.ledger.push({ id: 'a1', text: 'przyjdzie 20 osób' });
+            go('checkpoint');
+            assert(STATE.screen === 'checkpoint', 'allowed after assumption');
+        });
+
         // ─── Constants ───
-        const steps = [
-            {
-                title: "Zrozumienie Problemu",
-                questions: [
-                    { id: "u1", text: "Co próbujesz znaleźć lub rozwiązać?" },
-                    { id: "u2", text: "Jakie informacje są podane?" },
-                    { id: "u3", text: "Jakie są niewiadome?" },
-                    { id: "u4", text: "Czy możesz przeformułować problem własnymi słowami?" }
-                ],
-                key: "understanding",
-                tone: "tone-sky",
-                icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>'
+        const FLOW = ['warmup', 'interstitial', 'investigate', 'checkpoint', 'plan', 'execute', 'lookback', 'summary'];
+        const STORAGE_KEY = 'polya-detective-v1';
+        const T = {
+            pl: {
+                'nav.next': 'Następny', 'nav.prev': 'Poprzedni', 'nav.reset': 'Zacznij od nowa',
+                'nav.done': 'Gotowe!', 'lang.toggle': 'EN',
+                'ledger.title': 'Dziennik założeń', 'ledger.empty': 'Brak założeń – jeszcze.',
+                'ledger.add': 'Zapisz założenie',
+                'placeholder.screen': 'Ekran w budowie',
             },
-            {
-                title: "Opracowanie Planu",
-                questions: [
-                    { id: "p1", text: "Czy widziałeś podobny problem wcześniej?" },
-                    { id: "p2", text: "Czy możesz rozłożyć to na mniejsze kroki?" },
-                    { id: "p3", text: "Jaka strategia może tutaj zadziałać?" },
-                    { id: "p4", text: "Jakie narzędzia lub metody mogą pomóc?" }
-                ],
-                key: "planning",
-                tone: "tone-sun",
-                icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>'
+            en: {
+                'nav.next': 'Next', 'nav.prev': 'Previous', 'nav.reset': 'Start over',
+                'nav.done': 'Done!', 'lang.toggle': 'PL',
+                'ledger.title': 'Assumption ledger', 'ledger.empty': 'No assumptions – yet.',
+                'ledger.add': 'Save assumption',
+                'placeholder.screen': 'Screen under construction',
             },
-            {
-                title: "Realizacja Planu",
-                questions: [
-                    { id: "e1", text: "Zapisz każdy krok swojego rozwiązania" },
-                    { id: "e2", text: "Czy jesteś pewien, że każdy krok jest poprawny?" },
-                    { id: "e3", text: "Czy możesz udowodnić, że każdy krok jest poprawny?" },
-                    { id: "e4", text: "Co może pójść nie tak?" }
-                ],
-                key: "execution",
-                tone: "tone-grass",
-                icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>'
-            },
-            {
-                title: "Spojrzenie Wstecz",
-                questions: [
-                    { id: "r1", text: "Czy twoja odpowiedź jest rozsądna?" },
-                    { id: "r2", text: "Czy możesz sprawdzić wynik?" },
-                    { id: "r3", text: "Czy możesz rozwiązać to w inny sposób?" },
-                    { id: "r4", text: "Czego nauczyłeś się z tego problemu?" }
-                ],
-                key: "reflection",
-                tone: "tone-grape",
-                icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>'
-            }
-        ];
-
-        const sampleProblem = "Maria ma 24 cukierki. Chce je równo podzielić między siebie i przyjaciół na swoim przyjęciu urodzinowym. Jeśli każda osoba dostanie 4 cukierki, ilu przyjaciół Maria może zaprosić na swoje przyjęcie?";
-
-        const exampleResponses = {
-            "u1": "Muszę znaleźć, ilu przyjaciół Maria może zaprosić na swoje przyjęcie.",
-            "u2": "Maria ma łącznie 24 cukierki. Każda osoba (łącznie z Marią) dostaje 4 cukierki.",
-            "u3": "Nie wiem, ilu przyjaciół może zaprosić.",
-            "u4": "Maria dzieli 24 cukierki tak, że każdy dostaje 4 cukierki. Muszę znaleźć, ile osób może dostać cukierki.",
-            "p1": "To jest jak zadanie z dzieleniem! Muszę podzielić łączną liczbę cukierków przez liczbę cukierków dla każdej osoby.",
-            "p2": "Krok 1: Ustalić, ile osób może dostać cukierki.\\nKrok 2: Ponieważ Maria jest jedną z tych osób, liczba przyjaciół jest o jeden mniejsza niż całkowita liczba osób.",
-            "p3": "Podzielę łączną liczbę cukierków przez liczbę cukierków na osobę.",
-            "p4": "Dzielenie pomoże mi rozwiązać ten problem.",
-            "e1": "Łączna liczba cukierków ÷ Cukierki na osobę = Liczba osób\\n24 ÷ 4 = 6 osób\\nPonieważ Maria jest jedną z tych osób, może zaprosić 6 - 1 = 5 przyjaciół.",
-            "e2": "Tak, ponieważ 6 osób × 4 cukierki = 24 cukierki łącznie.",
-            "e3": "Mogę sprawdzić licząc: Maria (4) + Przyjaciel 1 (4) + Przyjaciel 2 (4) + Przyjaciel 3 (4) + Przyjaciel 4 (4) + Przyjaciel 5 (4) = 24 cukierki",
-            "e4": "Mogę zapomnieć odjąć Marię od całkowitej liczby osób.",
-            "r1": "Tak, 5 przyjaciół wydaje się rozsądne dla małego przyjęcia urodzinowego z ograniczoną liczbą cukierków.",
-            "r2": "Mogę rozwiązać to w inny sposób: 24 cukierki - 4 dla Marii = 20 cukierków zostało. Następnie 20 ÷ 4 = 5 przyjaciół.",
-            "r3": "Mogłabym narysować 24 cukierki i zakreślać grupy po 4, aż się skończą, a następnie policzyć grupy i odjąć 1 dla Marii.",
-            "r4": "Nauczyłem się, że w zadaniach z dzieleniem z udziałem ludzi, czasami muszę pamiętać, czy osoba dzieląca jest wliczona do całkowitej liczby osób!"
         };
 
         // ─── State ───
-        let currentStep = 0;
-        let responses = {};
-        let currentQuestionByStep = steps.map(() => 0);
-        let revealedExamples = {};
+        function freshState() {
+            return {
+                lang: 'pl',
+                screen: 'warmup',
+                warmup: { responses: {}, questionIndex: 0, exampleRevealed: {} },
+                investigation: { asked: [], crucialAsked: false },
+                ledger: [],
+                plan: { responses: {} },
+                execute: { work: '', answer: '' },
+                lookback: { reactions: {}, galleryRevealed: false, reflection: '' },
+            };
+        }
+        let STATE = freshState();
 
         // ─── DOM refs ───
-        const progressIndicatorEl = document.getElementById('progressIndicator');
-        const currentStepContentEl = document.getElementById('currentStepContent');
-        const previousButton = document.getElementById('previousButton');
-        const nextButton = document.getElementById('nextButton');
-        const resetButton = document.getElementById('resetButton');
-        const summaryView = document.getElementById('summaryView');
-        const summaryContent = document.getElementById('summaryContent');
+        const screenRoot = document.getElementById('screenRoot');
+        const liveRegion = document.getElementById('liveRegion');
 
         // ─── Helpers ───
         function escapeHtml(value) {
@@ -473,227 +433,47 @@
                 "'": '&#039;'
             })[character]);
         }
+        function t(key) { return (T[STATE.lang] && T[STATE.lang][key]) || T.pl[key] || key; }
+        function announce(text) { if (liveRegion) liveRegion.textContent = text; }
+        function canLeaveInvestigate() {
+            return !STATE.investigation.crucialAsked || STATE.ledger.length >= 1;
+        }
+        function canEnter(screen) {
+            if (STATE.screen === 'investigate' && screen !== 'investigate' && !canLeaveInvestigate()) return false;
+            if (screen === 'execute') return STATE.ledger.length >= 1;
+            return FLOW.includes(screen);
+        }
+        function go(screen) {
+            if (!canEnter(screen)) return;
+            STATE.screen = screen;
+            persist();
+            if (!TESTING) { renderAll(); announce(screen); }
+        }
+        function persist() {
+            if (TESTING) return;
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch (e) { /* private mode */ }
+        }
+        function restore() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                if (saved && FLOW.includes(saved.screen)) STATE = Object.assign(freshState(), saved);
+            } catch (e) { /* corrupt or unavailable – start fresh */ }
+        }
 
         // ─── Render ───
-        function renderProgressIndicator() {
-            progressIndicatorEl.innerHTML = steps.map((step, index) => `
-                <button
-                    data-index="${index}"
-                    class="progress-step ${index === currentStep ? 'is-current' : ''} ${index < currentStep ? 'is-done' : ''}"
-                >
-                    <div class="step-dot ${step.tone}">${step.icon}</div>
-                    <div class="step-label">${step.title}</div>
-                    <div class="step-track"><div class="step-fill ${step.tone}"></div></div>
-                </button>
-            `).join('');
-
-            progressIndicatorEl.querySelectorAll('button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    setCurrentStep(parseInt(e.currentTarget.dataset.index));
-                });
-            });
-        }
-
-        function renderCurrentStepContent() {
-            const currentStepData = steps[currentStep];
-            const currentQuestionIndex = currentQuestionByStep[currentStep];
-            const question = currentStepData.questions[currentQuestionIndex];
-            const isExampleRevealed = revealedExamples[question.id];
-            currentStepContentEl.innerHTML = `
-                <div class="step-head">
-                    <div class="step-dot ${currentStepData.tone}">${currentStepData.icon}</div>
-                    <h3>Krok ${currentStep + 1}: ${currentStepData.title}</h3>
-                </div>
-                <div class="step-progress">
-                    <div>
-                        <div class="step-progress-label">Postęp w tym kroku</div>
-                        <div class="step-progress-count">Pytanie ${currentQuestionIndex + 1} z ${currentStepData.questions.length}</div>
-                    </div>
-                    <div class="question-pips" role="navigation" aria-label="Pytania w kroku ${currentStep + 1}">
-                        ${currentStepData.questions.map((item, index) => {
-                            const isCurrent = index === currentQuestionIndex;
-                            const isAnswered = Boolean(responses[item.id]);
-                            return `
-                                <button
-                                    type="button"
-                                    data-question-index="${index}"
-                                    class="question-pip ${isCurrent ? 'is-current' : isAnswered ? 'is-answered' : ''}"
-                                    aria-label="Pytanie ${index + 1}${isAnswered ? ', odpowiedź zapisana' : ''}"
-                                    ${isCurrent ? 'aria-current="true"' : ''}
-                                >${isAnswered && !isCurrent ? '✓' : index + 1}</button>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-                <div class="question-panel question-enter">
-                    <div class="question-title">
-                        <span class="question-number">${currentQuestionIndex + 1}</span>
-                        <span class="question-text">${question.text}</span>
-                    </div>
-                    <textarea
-                        id="textarea-${question.id}"
-                        class="answer"
-                        placeholder="Napisz tutaj swoją super odpowiedź..."
-                    >${escapeHtml(responses[question.id] || '')}</textarea>
-
-                    <div class="example-block">
-                        <button
-                            type="button"
-                            data-toggle-example="${question.id}"
-                            class="example-toggle ${isExampleRevealed ? 'is-open' : ''}"
-                            aria-expanded="${Boolean(isExampleRevealed)}"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-                            ${isExampleRevealed ? 'Ukryj przykładową odpowiedź' : 'Pokaż przykładową odpowiedź'}
-                        </button>
-                        ${isExampleRevealed && exampleResponses[question.id] ? `
-                            <div class="example-answer question-enter">
-                                <div class="example-answer-label">Przykładowa odpowiedź – porównaj ją ze swoją</div>
-                                <div class="example-answer-text">${exampleResponses[question.id].replace(/\\n/g, '<br>')}</div>
-                            </div>
-                        ` : ''}
-                    </div>
-
-                    <div class="question-nav">
-                        <button
-                            type="button"
-                            data-question-action="previous"
-                            class="edu-btn-ghost edu-btn-sm"
-                            ${currentQuestionIndex === 0 ? 'disabled' : ''}
-                        >← Poprzednie pytanie</button>
-                        <button
-                            type="button"
-                            data-question-action="next"
-                            class="edu-btn edu-btn-sm"
-                            ${currentQuestionIndex === currentStepData.questions.length - 1 ? 'disabled' : ''}
-                        >Następne pytanie →</button>
-                    </div>
-                </div>
-            `;
-
-            const textarea = document.getElementById(`textarea-${question.id}`);
-            textarea.addEventListener('input', (event) => handleInputChange(question.id, event.target.value));
-
-            currentStepContentEl.querySelectorAll('[data-question-index]').forEach(button => {
-                button.addEventListener('click', () => {
-                    currentQuestionByStep[currentStep] = Number(button.dataset.questionIndex);
-                    renderCurrentStepContent();
-                });
-            });
-
-            currentStepContentEl.querySelectorAll('[data-question-action]').forEach(button => {
-                button.addEventListener('click', () => {
-                    const direction = button.dataset.questionAction === 'next' ? 1 : -1;
-                    currentQuestionByStep[currentStep] += direction;
-                    renderCurrentStepContent();
-                });
-            });
-
-            currentStepContentEl.querySelector('[data-toggle-example]').addEventListener('click', (event) => {
-                const questionId = event.currentTarget.dataset.toggleExample;
-                revealedExamples[questionId] = !revealedExamples[questionId];
-                renderCurrentStepContent();
-            });
-
-            updateNavigationButtons();
-        }
-
-        function renderSummary() {
-            const hasAnyResponse = Object.keys(responses).length > 0;
-            summaryView.classList.toggle('hidden', !hasAnyResponse);
-
-            if (!hasAnyResponse) {
-                summaryContent.innerHTML = '';
-                return;
-            }
-
-            summaryContent.innerHTML = steps.map(step => {
-                const hasResponsesForStep = step.questions.some(q => responses[q.id]);
-                if (!hasResponsesForStep) return '';
-
-                return `
-                    <div class="summary-step">
-                        <h4 class="summary-step-title">
-                            <span class="step-dot ${step.tone}">${step.icon}</span>
-                            ${step.title}
-                        </h4>
-                        <div class="summary-answers">
-                            ${step.questions.map(question => `
-                                ${responses[question.id] ? `
-                                    <div class="summary-answer">
-                                        <div class="summary-question">${question.text}</div>
-                                        <p class="summary-response">${escapeHtml(responses[question.id])}</p>
-                                    </div>
-                                ` : ''}
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ─── Listeners / state transitions ───
-        function handleInputChange(questionId, value) {
-            if (value.trim()) {
-                responses[questionId] = value;
-            } else {
-                delete responses[questionId];
-            }
-
-            renderSummary();
-        }
-
-        function setCurrentStep(stepIndex) {
-            currentStep = stepIndex;
-            renderAll();
-        }
-
-        function handleNext() {
-            if (currentStep < steps.length - 1) {
-                currentStep++;
-                renderAll();
-            }
-        }
-
-        function handlePrevious() {
-            if (currentStep > 0) {
-                currentStep--;
-                renderAll();
-            }
-        }
-
-        function handleReset() {
-            currentStep = 0;
-            responses = {};
-            currentQuestionByStep = steps.map(() => 0);
-            revealedExamples = {};
-            renderAll();
-        }
-
-        function updateNavigationButtons() {
-            previousButton.disabled = currentStep === 0;
-            nextButton.disabled = currentStep === steps.length - 1;
-
-            if (currentStep === steps.length - 1) {
-                nextButton.innerHTML = `Gotowe! <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
-            } else {
-                nextButton.innerHTML = `Następny <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`;
-            }
-        }
-
-        function renderAll() {
-            renderProgressIndicator();
-            renderCurrentStepContent();
-            renderSummary();
-        }
+        const RENDER = {};
+        FLOW.forEach(screen => {
+            RENDER[screen] = () => {
+                screenRoot.innerHTML = `<section class="card"><p class="edu-p">${t('placeholder.screen')}: ${screen}</p></section>`;
+            };
+        });
+        function renderAll() { RENDER[STATE.screen](); }
 
         // ─── Init ───
         document.addEventListener('DOMContentLoaded', () => {
+            if (location.search.includes('selftest=1')) { TESTING = true; runSelfTests(); return; }
+            restore();
             renderAll();
-
-            previousButton.addEventListener('click', handlePrevious);
-            nextButton.addEventListener('click', handleNext);
-            resetButton.addEventListener('click', handleReset);
         });
     </script>
 </body>
