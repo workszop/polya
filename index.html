@@ -258,6 +258,26 @@
 
         .question-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
 
+        /* ─── Investigate screen ─── */
+        .fact-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .fact-chip { font-family: var(--font-mono); font-size: 12px; padding: 6px 12px;
+                     border-radius: var(--r-pill); background: var(--sky-soft); color: var(--sky-ink); }
+        .inv-question { border: 1px solid var(--line); border-radius: var(--r-md);
+                        padding: 12px 16px; margin-top: 10px; background: var(--surface); }
+        .inv-question button { font-family: var(--font-sans); font-weight: 600; color: var(--ink);
+                               width: 100%; text-align: left; }
+        .inv-question button:disabled { color: var(--ink-3); }
+        .inv-answer { margin-top: 10px; padding: 12px 14px; border-radius: var(--r-sm);
+                      background: var(--paper); color: var(--ink-2); font-size: 15px; }
+        .inv-answer.is-unknown { background: var(--coral-soft); color: var(--coral-ink); font-weight: 600; }
+        .ledger-panel { position: sticky; top: 76px; background: var(--marigold-soft); color: var(--marigold-ink);
+                        border-radius: var(--r-lg); padding: 18px 20px; }
+        .ledger-panel h4 { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em;
+                           text-transform: uppercase; margin-bottom: 10px; }
+        .ledger-panel li { font-size: 14.5px; line-height: 1.5; margin-top: 6px; list-style: none; }
+        .inv-layout { display: grid; grid-template-columns: 1fr 260px; gap: 22px; align-items: start; }
+        @media (max-width: 768px) { .inv-layout { grid-template-columns: 1fr; } .ledger-panel { position: static; } }
+
         /* ─── Buttons ─── */
         .edu-btn {
             display: inline-flex; align-items: center; gap: 8px;
@@ -430,6 +450,38 @@
             assert(screenRoot.innerHTML.includes('zadanie szkolne'), 'contrast copy');
             assert(screenRoot.querySelector('[data-action="start-flagship"]'), 'CTA present');
         });
+        st('askQuestion decrements budget and records the ask', () => {
+            askQuestion('q-pizza');
+            assert(STATE.investigation.asked.includes('q-pizza'), 'recorded');
+            assert(budgetLeft() === FLAGSHIP.budget - 1, 'budget spent');
+            askQuestion('q-pizza');
+            assert(budgetLeft() === FLAGSHIP.budget - 1, 'no double spend');
+        });
+        st('crucial question sets crucialAsked and blocks exit until assumption', () => {
+            STATE.screen = 'investigate';
+            askQuestion('q-count');
+            assert(STATE.investigation.crucialAsked === true, 'flag set');
+            go('checkpoint');
+            assert(STATE.screen === 'investigate', 'exit blocked');
+            addAssumption('Zakładam, że przyjdzie 20 osób.');
+            assert(STATE.ledger.length === 1, 'ledger entry');
+            go('checkpoint');
+            assert(STATE.screen === 'checkpoint', 'exit allowed');
+        });
+        st('budget exhausted disables further asks', () => {
+            askQuestion('q-pizza'); askQuestion('q-dishes'); askQuestion('q-drinks');
+            assert(budgetLeft() === 0, 'spent');
+            askQuestion('q-rain');
+            assert(!STATE.investigation.asked.includes('q-rain'), 'ask refused');
+        });
+        st('investigate renders facts, menu, and answers for asked questions', () => {
+            STATE.screen = 'investigate';
+            STATE.investigation.asked = ['q-pizza'];
+            TESTING = false; renderAll(); TESTING = true;
+            assert(screenRoot.innerHTML.includes('Budżet: 300 zł'), 'known fact');
+            assert(screenRoot.innerHTML.includes('Duża pizza kosztuje 40'), 'asked answer shown');
+            assert(!screenRoot.innerHTML.includes('kubki i talerzyki są w świetlicy'), 'unasked answer hidden');
+        });
 
         // ─── Constants ───
         const FLOW = ['warmup', 'interstitial', 'investigate', 'checkpoint', 'plan', 'execute', 'lookback', 'summary'];
@@ -448,6 +500,12 @@
                 'interstitial.cta': 'Pokaż prawdziwy problem',
                 'warmup.example.show': 'Pokaż przykładową odpowiedź',
                 'warmup.example.hide': 'Ukryj przykładową odpowiedź',
+                'inv.eyebrow': 'Krok 1 · Zrozumienie Problemu',
+                'inv.facts': 'Co wiesz',
+                'inv.menu': 'Zadaj pytanie (możesz wybrać {n})',
+                'inv.budgetLeft': 'Pozostałe pytania: {n}',
+                'inv.assumptionPrompt': 'Zapisz swoje założenie, żeby móc iść dalej:',
+                'inv.next': 'Mam dość informacji – planuję',
             },
             en: {
                 'nav.next': 'Next', 'nav.prev': 'Previous', 'nav.reset': 'Start over',
@@ -462,6 +520,12 @@
                 'interstitial.cta': 'Show me a real problem',
                 'warmup.example.show': 'Show an example answer',
                 'warmup.example.hide': 'Hide the example answer',
+                'inv.eyebrow': 'Step 1 · Understand the Problem',
+                'inv.facts': 'What you know',
+                'inv.menu': 'Ask a question (you may pick {n})',
+                'inv.budgetLeft': 'Questions left: {n}',
+                'inv.assumptionPrompt': 'Write down your assumption to move on:',
+                'inv.next': 'I have enough – let me plan',
             },
         };
         const PROBLEMS = [
@@ -560,6 +624,7 @@
             })[character]);
         }
         function t(key) { return (T[STATE.lang] && T[STATE.lang][key]) || T.pl[key] || key; }
+        function tn(key, n) { return t(key).replace('{n}', n); }
         function announce(text) { if (liveRegion) liveRegion.textContent = text; }
         function canLeaveInvestigate() {
             return !STATE.investigation.crucialAsked || STATE.ledger.length >= 1;
@@ -649,12 +714,82 @@
             screenRoot.querySelector('[data-action="start-flagship"]').addEventListener('click', () => go('investigate'));
         };
 
+        function budgetLeft() { return FLAGSHIP.budget - STATE.investigation.asked.length; }
+        function askQuestion(id) {
+            if (budgetLeft() <= 0) return;
+            if (STATE.investigation.asked.includes(id)) return;
+            const q = FLAGSHIP.infoMenu.find(item => item.id === id);
+            if (!q) return;
+            STATE.investigation.asked.push(id);
+            if (q.kind === 'crucial') STATE.investigation.crucialAsked = true;
+            persist();
+            if (!TESTING) { renderAll(); announce(q.answer || q.unknownReply); }
+        }
+        function addAssumption(text) {
+            const clean = text.trim();
+            if (!clean) return;
+            STATE.ledger.push({ id: 'a' + (STATE.ledger.length + 1), text: clean });
+            persist();
+            if (!TESTING) renderAll();
+        }
+        function renderLedgerPanel() {
+            const items = STATE.ledger.length
+                ? STATE.ledger.map(a => `<li>• ${escapeHtml(a.text)}</li>`).join('')
+                : `<li>${t('ledger.empty')}</li>`;
+            return `<aside class="ledger-panel" aria-label="${t('ledger.title')}">
+                <h4>${t('ledger.title')}</h4><ul>${items}</ul></aside>`;
+        }
+
+        RENDER.investigate = () => {
+            const needsAssumption = STATE.investigation.crucialAsked && STATE.ledger.length === 0;
+            screenRoot.innerHTML = `
+                <section class="card">
+                    <div class="card-eyebrow"><span class="edu-overline">${t('inv.eyebrow')}</span></div>
+                    <div class="problem-well">${FLAGSHIP.brief}</div>
+                    <div class="inv-layout" style="margin-top:18px">
+                        <div>
+                            <p class="edu-overline" style="margin-bottom:8px">${t('inv.facts')}</p>
+                            <div class="fact-chips">${FLAGSHIP.knownFacts.map(f => `<span class="fact-chip">${f}</span>`).join('')}</div>
+                            <p class="edu-overline" style="margin:20px 0 4px">${tn('inv.menu', FLAGSHIP.budget)} · ${tn('inv.budgetLeft', budgetLeft())}</p>
+                            ${FLAGSHIP.infoMenu.map(q => {
+                                const asked = STATE.investigation.asked.includes(q.id);
+                                const reply = asked ? (q.answer
+                                    ? `<div class="inv-answer">${q.answer}</div>`
+                                    : `<div class="inv-answer is-unknown">${q.unknownReply}</div>`) : '';
+                                return `<div class="inv-question">
+                                    <button type="button" data-ask="${q.id}" ${asked || budgetLeft() <= 0 ? 'disabled' : ''}>${q.question}</button>
+                                    ${reply}</div>`;
+                            }).join('')}
+                            ${needsAssumption ? `
+                                <div class="question-panel question-enter" style="margin-top:16px">
+                                    <p class="edu-p"><strong>${t('inv.assumptionPrompt')}</strong></p>
+                                    <textarea class="answer" id="assumption-input" style="min-height:64px"></textarea>
+                                    <button type="button" class="edu-btn edu-btn-sm" data-action="add-assumption">${t('ledger.add')}</button>
+                                </div>` : ''}
+                            <div class="question-nav" style="margin-top:20px">
+                                <span></span>
+                                <button type="button" class="edu-btn" data-action="to-checkpoint" ${canLeaveInvestigate() ? '' : 'disabled'}>${t('inv.next')} →</button>
+                            </div>
+                        </div>
+                        ${renderLedgerPanel()}
+                    </div>
+                </section>`;
+            screenRoot.querySelectorAll('[data-ask]').forEach(b =>
+                b.addEventListener('click', () => askQuestion(b.dataset.ask)));
+            const addBtn = screenRoot.querySelector('[data-action="add-assumption"]');
+            if (addBtn) addBtn.addEventListener('click', () =>
+                addAssumption(document.getElementById('assumption-input').value));
+            screenRoot.querySelector('[data-action="to-checkpoint"]').addEventListener('click', () => go('checkpoint'));
+        };
+
         function renderAll() { RENDER[STATE.screen](); }
 
         // ─── Init ───
         document.addEventListener('DOMContentLoaded', () => {
             if (location.search.includes('selftest=1')) { TESTING = true; runSelfTests(); return; }
             restore();
+            const jump = new URLSearchParams(location.search).get('screen');
+            if (jump && FLOW.includes(jump)) STATE.screen = jump;
             renderAll();
         });
     </script>
