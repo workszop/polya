@@ -633,7 +633,7 @@
                 STATE.warmup.responses[q.id] = e.target.value; persist();
             });
             screenRoot.querySelector('[data-action="toggle-example"]').addEventListener('click', () => {
-                STATE.warmup.exampleRevealed[q.id] = !STATE.warmup.exampleRevealed[q.id]; renderAll();
+                STATE.warmup.exampleRevealed[q.id] = !STATE.warmup.exampleRevealed[q.id]; persist(); renderAll();
             });
             screenRoot.querySelector('[data-action="warmup-next"]').addEventListener('click', warmupNext);
         };
