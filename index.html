@@ -3,98 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Polya Framework</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Polya Framework · edulab</title>
     <style>
-        /* Custom styles if needed, though Tailwind handles most */
-        body {
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        /* ============================================================
+           edulab — Colors & Type foundation (design tokens)
+           ============================================================ */
+        @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+        :root {
+            --font-display: 'Bricolage Grotesque', 'Hanken Grotesk', system-ui, sans-serif;
+            --font-sans:    'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+            --font-mono:    'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+            --paper:    #FBF7F0;
+            --paper-2:  #F4EDDF;
+            --paper-3:  #ECE1CF;
+            --surface:  #FFFFFF;
+
+            --ink:      #211E1A;
+            --ink-2:    #5B554D;
+            --ink-3:    #938A7C;
+            --line:     #E7DCCB;
+            --line-2:   #D6C8B2;
+
+            --marigold:      #E8920C;
+            --marigold-600:  #CE800A;
+            --marigold-soft: #FBE7C2;
+            --marigold-ink:  #8A4F00;
+
+            --teal:      #0E8C7F;
+            --teal-600:  #0B7468;
+            --teal-soft: #D2EBE6;
+            --teal-ink:  #0A5A52;
+
+            --coral:      #EF5B3F;
+            --coral-600:  #D44A30;
+            --coral-soft: #FBDDD4;
+            --coral-ink:  #9A2E1B;
+
+            --sky:      #2E78C9;
+            --sky-soft: #D9E7F6;
+            --sky-ink:  #1B4E88;
+
+            --play-sun:    #F2A516;
+            --play-grass:  #4FA45C;
+            --play-berry:  #C6478B;
+            --play-grape:  #7A5AC2;
+            --play-sky:    #2E78C9;
+
+            --success:      #2F8F5B;  --success-soft: #D7EEDD;  --success-ink: #1C6A3E;
+
+            --focus-ring: 0 0 0 3px rgba(232,146,12,.38);
+
+            --r-xs: 6px; --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px; --r-pill: 999px;
+
+            --shadow-sm: 0 1px 2px rgba(33,30,26,.06), 0 1px 1px rgba(33,30,26,.04);
+            --shadow-md: 0 4px 16px rgba(33,30,26,.08), 0 1px 3px rgba(33,30,26,.05);
+            --shadow-lg: 0 16px 40px rgba(33,30,26,.12), 0 3px 8px rgba(33,30,26,.06);
+            --shadow-marigold: 0 8px 22px rgba(232,146,12,.28);
         }
-        /* Style for textareas that mimic the Textarea component */
-        textarea {
-            resize: vertical; /* Allows vertical resizing */
+
+        /* ─── Base ─── */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body.edu {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-sans);
+            font-size: 16px;
+            line-height: 1.6;
         }
-        .question-enter {
-            animation: question-enter 180ms ease-out;
+        button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+        button:focus-visible, textarea:focus-visible, a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+        button:disabled { opacity: .4; cursor: not-allowed; }
+
+        /* ─── Branded top menu (shared edulab chrome) ─── */
+        .edu-header {
+            position: sticky; top: 0; z-index: 50; width: 100%;
+            background: rgba(251, 247, 240, 0.85);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--line);
         }
+        .edu-header-inner {
+            max-width: 1100px; margin: 0 auto;
+            padding: 15px 30px; display: flex; align-items: center; gap: 12px;
+        }
+        .edu-logo { width: 32px; height: 32px; display: block; }
+        .edu-wordmark { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -.02em; color: var(--ink); }
+        .edu-tag {
+            font-family: var(--font-mono); font-weight: 500; font-size: 11px;
+            letter-spacing: .14em; text-transform: uppercase; color: var(--teal-ink);
+            background: var(--teal-soft); padding: 4px 9px; border-radius: var(--r-pill);
+        }
+
+        /* ─── Layout shell ─── */
+        .shell { max-width: 920px; margin: 0 auto; padding: 44px 30px 70px; }
+        .shell > * + * { margin-top: 28px; }
+
+        /* ─── Page header scheme (eyebrow → title → lead) ─── */
+        .page-header { text-align: center; padding: 12px 0 8px; }
+        .edu-overline {
+            font-family: var(--font-mono); font-weight: 500; font-size: 12px;
+            letter-spacing: .14em; text-transform: uppercase; color: var(--marigold-ink);
+        }
+        .app-title {
+            font-family: var(--font-display); font-weight: 800;
+            font-size: clamp(2rem, 4.5vw, 2.85rem); letter-spacing: -.025em;
+            line-height: 1.05; color: var(--ink);
+            margin-top: 12px;
+        }
+        .edu-lead { font-size: 1.0625rem; color: var(--ink-2); max-width: 36rem; margin: 14px auto 0; }
+
+        /* ─── Cards ─── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--r-xl);
+            box-shadow: var(--shadow-md);
+            padding: 30px 34px;
+        }
+        .card-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+        .card-eyebrow svg { color: var(--marigold); flex: none; }
+
+        .problem-well {
+            background: var(--marigold-soft);
+            color: var(--marigold-ink);
+            border-radius: var(--r-lg);
+            padding: 22px 26px;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 19px;
+            line-height: 1.45;
+            text-align: center;
+        }
+        .hint-note {
+            display: flex; align-items: flex-start; gap: 12px;
+            margin-top: 16px; padding: 14px 18px;
+            background: var(--sky-soft); color: var(--sky-ink);
+            border-radius: var(--r-md);
+            font-size: 14.5px; line-height: 1.55;
+        }
+        .hint-note svg { flex: none; margin-top: 2px; }
+
+        /* ─── Progress indicator ─── */
+        .progress-row { display: flex; gap: 14px; }
+        .progress-step { flex: 1; text-align: center; transition: opacity .15s ease; }
+        .progress-step:hover { opacity: .8; }
+        .step-dot {
+            width: 52px; height: 52px; border-radius: var(--r-pill);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto; color: #fff;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow .15s ease;
+        }
+        .step-dot svg { width: 46%; height: 46%; }
+        .progress-step.is-current .step-dot { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--ink); }
+        .step-label {
+            font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em;
+            text-transform: uppercase; color: var(--ink-3);
+            margin-top: 10px; line-height: 1.35;
+        }
+        .progress-step.is-current .step-label { color: var(--ink); font-weight: 500; }
+        .step-track {
+            height: 5px; background: var(--paper-3); border-radius: var(--r-pill);
+            margin-top: 10px; overflow: hidden;
+        }
+        .step-fill { height: 100%; border-radius: var(--r-pill); width: 0; transition: width .3s ease; }
+        .progress-step.is-done .step-fill, .progress-step.is-current .step-fill { width: 100%; }
+
+        .tone-sky   { background: var(--play-sky); }
+        .tone-sun   { background: var(--play-sun); }
+        .tone-grass { background: var(--play-grass); }
+        .tone-grape { background: var(--play-grape); }
+
+        /* ─── Step content ─── */
+        .step-head { display: flex; align-items: center; gap: 14px; margin-top: 26px; }
+        .step-head .step-dot { margin: 0; width: 46px; height: 46px; }
+        .step-head h3 {
+            font-family: var(--font-display); font-weight: 600; font-size: 25px;
+            letter-spacing: -.01em; color: var(--ink);
+        }
+
+        .step-progress {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px;
+            margin-top: 18px; padding: 14px 18px;
+            background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-md);
+        }
+        .step-progress-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+        .step-progress-count { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--ink); margin-top: 2px; }
+        .question-pips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .question-pip {
+            width: 36px; height: 36px; border-radius: var(--r-pill);
+            font-family: var(--font-mono); font-weight: 500; font-size: 14px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: var(--surface); color: var(--ink-2);
+            border: 1px solid var(--line-2);
+            transition: background .15s ease, color .15s ease;
+        }
+        .question-pip:hover { border-color: var(--ink-3); }
+        .question-pip.is-answered { background: var(--success-soft); color: var(--success-ink); border-color: transparent; }
+        .question-pip.is-current { background: var(--marigold); color: #fff; border-color: transparent; }
+
+        .question-panel {
+            margin-top: 18px; padding: 24px 26px;
+            background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg);
+        }
+        .question-panel > * + * { margin-top: 16px; }
+        .question-title { display: flex; align-items: flex-start; gap: 12px; }
+        .question-number {
+            flex: none; width: 30px; height: 30px; border-radius: var(--r-pill);
+            background: var(--marigold); color: #fff;
+            font-family: var(--font-mono); font-size: 14px;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .question-text { font-family: var(--font-display); font-weight: 600; font-size: 19px; line-height: 1.35; color: var(--ink); padding-top: 2px; }
+
+        textarea.answer {
+            width: 100%; min-height: 128px; resize: vertical;
+            background: var(--surface); color: var(--ink);
+            border: 1px solid var(--line-2); border-radius: var(--r-md);
+            padding: 14px 16px; font-family: var(--font-sans); font-size: 16px; line-height: 1.55;
+            transition: border-color .15s ease;
+        }
+        textarea.answer::placeholder { color: var(--ink-3); }
+        textarea.answer:focus { border-color: var(--marigold); }
+
+        .example-block { border-top: 1px solid var(--line); padding-top: 16px; }
+        .example-toggle {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: var(--font-display); font-weight: 600; font-size: 14px;
+            padding: 9px 16px; border-radius: var(--r-pill);
+            background: var(--surface); color: var(--teal-ink);
+            border: 1px solid var(--line-2);
+            transition: background .15s ease;
+        }
+        .example-toggle:hover { background: var(--teal-soft); }
+        .example-toggle.is-open { background: var(--teal-soft); border-color: transparent; }
+        .example-answer {
+            margin-top: 14px; padding: 18px 20px;
+            background: var(--teal-soft); color: var(--teal-ink);
+            border-radius: var(--r-md);
+        }
+        .example-answer-label {
+            font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em;
+            text-transform: uppercase; margin-bottom: 8px;
+        }
+        .example-answer-text { white-space: pre-wrap; font-size: 15px; line-height: 1.6; }
+
+        .question-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
+
+        /* ─── Buttons ─── */
+        .edu-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: var(--font-display); font-weight: 600; font-size: 16px;
+            background: var(--marigold); color: #fff;
+            border-radius: var(--r-pill); padding: 12px 22px;
+            box-shadow: var(--shadow-marigold);
+            transition: background .15s ease, transform .12s cubic-bezier(.32,.72,.32,1);
+        }
+        .edu-btn:hover:not(:disabled) { background: var(--marigold-600); }
+        .edu-btn:active:not(:disabled) { transform: scale(.96); }
+
+        .edu-btn-ghost {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: var(--font-display); font-weight: 600; font-size: 16px;
+            background: var(--surface); color: var(--ink);
+            border: 1px solid var(--line-2);
+            border-radius: var(--r-pill); padding: 11px 21px;
+            transition: background .15s ease;
+        }
+        .edu-btn-ghost:hover:not(:disabled) { background: var(--paper-2); }
+
+        .edu-btn-sm { padding: 8px 16px; font-size: 14px; }
+        .edu-btn-ghost.is-danger { color: var(--coral-ink); }
+        .edu-btn-ghost.is-danger:hover:not(:disabled) { background: var(--coral-soft); border-color: transparent; }
+
+        .main-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 26px; }
+
+        /* ─── Summary ─── */
+        .summary-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .summary-check {
+            flex: none; width: 40px; height: 40px; border-radius: var(--r-pill);
+            background: var(--success-soft); color: var(--success-ink);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .summary-head h2 { font-family: var(--font-display); font-weight: 600; font-size: 25px; letter-spacing: -.01em; color: var(--ink); }
+        .summary-step { padding: 20px 0; border-top: 1px solid var(--line); }
+        .summary-step:first-of-type { border-top: none; padding-top: 0; }
+        .summary-step-title { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 600; font-size: 19px; color: var(--ink); }
+        .summary-step-title .step-dot { margin: 0; width: 34px; height: 34px; box-shadow: none; }
+        .summary-answers { margin-top: 14px; padding-left: 16px; border-left: 3px solid var(--line-2); display: grid; gap: 12px; }
+        .summary-answer { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px 18px; }
+        .summary-question { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+        .summary-response { white-space: pre-wrap; color: var(--ink-2); font-size: 15px; line-height: 1.6; }
+
+        .hidden { display: none; }
+
+        .question-enter { animation: question-enter 180ms ease-out; }
         @keyframes question-enter {
             from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .shell { padding: 28px 18px 56px; }
+            .card { padding: 22px 20px; border-radius: var(--r-lg); }
+            .progress-row { gap: 8px; }
+            .step-label { font-size: 10px; }
+            .main-nav { flex-wrap: wrap; justify-content: center; }
+        }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div id="app" class="max-w-4xl mx-auto p-4 space-y-4 font-sans">
-        <div class="rounded-xl border-4 border-yellow-300 overflow-hidden shadow-lg">
-            <div class="bg-gradient-to-r from-yellow-100 to-amber-100 pb-4 pt-6">
-                <h2 class="text-2xl font-bold text-center text-amber-700 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                    Przykładowy Problem
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                </h2>
-            </div>
-            <div class="p-6 bg-gradient-to-b from-white to-yellow-50">
-                <div id="sampleProblem" class="text-xl text-center font-bold text-amber-800 p-4 border-2 border-dashed border-amber-300 rounded-lg bg-amber-50">
-                    Maria ma 24 cukierki. Chce je równo podzielić między siebie i przyjaciół na swoim przyjęciu urodzinowym. Jeśli każda osoba dostanie 4 cukierki, ilu przyjaciół Maria może zaprosić na swoje przyjęcie?
-                </div>
-                <div class="flex items-start gap-3 mt-4 p-3 bg-white border-2 border-amber-200 rounded-lg text-amber-800">
-                    <svg class="flex-none mt-0.5" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                    <p><strong>Najpierw spróbuj samodzielnie.</strong> Przykładową odpowiedź możesz odkryć osobno przy każdym pytaniu.</p>
-                </div>
-            </div>
+<body class="edu">
+    <header class="edu-header">
+        <div class="edu-header-inner">
+            <img class="edu-logo" alt="edulab" src="data:image/png;base64,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">
+            <span class="edu-wordmark">edulab</span>
+            <span class="edu-tag">demo lab</span>
         </div>
+    </header>
 
-        <div class="rounded-xl border-4 border-indigo-300 overflow-hidden shadow-lg">
-            <div class="bg-gradient-to-r from-indigo-100 via-pink-100 to-purple-100 pb-4 pt-6">
-                <h2 class="text-3xl font-bold text-center text-indigo-700">
-                    Przygoda z Rozwiązywaniem Problemów Pólyi! 🚀
-                </h2>
+    <main class="shell">
+        <header class="page-header">
+            <p class="edu-overline">Interaktywne narzędzie · Metoda Pólyi · 4 kroki</p>
+            <h1 class="app-title">Przygoda z rozwiązywaniem problemów</h1>
+            <p class="edu-lead">Przejdź przez cztery kroki metody George'a Pólyi: zrozum problem, opracuj plan, zrealizuj go i spójrz wstecz. Odpowiadaj na pytania pomocnicze, a na końcu zobaczysz podsumowanie swojej pracy.</p>
+        </header>
+
+        <section class="card" aria-labelledby="problemHeading">
+            <div class="card-eyebrow">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                <span id="problemHeading" class="edu-overline">Przykładowy problem</span>
             </div>
-            <div class="p-6 bg-gradient-to-b from-white to-blue-50">
-                <div class="space-y-6">
-                    <div id="progressIndicator" class="flex justify-between mb-8">
-                        </div>
-
-                    <div id="currentStepContent" class="space-y-6 p-6 border-4 rounded-xl border-gray-200 bg-white shadow-lg mt-6">
-                        </div>
-
-                    <div class="flex justify-between items-center mt-8">
-                        <button id="previousButton" class="flex items-center gap-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 rounded-xl p-6 text-lg font-bold shadow-md hover:shadow-lg transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
-                            Poprzedni
-                        </button>
-
-                        <div class="text-center">
-                            <button id="resetButton" class="flex items-center gap-2 border-2 border-red-300 text-red-600 hover:bg-red-50 rounded-xl p-5 font-bold shadow-md hover:shadow-lg transition-all">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-ccw"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.76 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.76-2.74L21 16"/><path d="M21 21v-5h-5"/></svg>
-                                Zacznij od Nowa
-                            </button>
-                        </div>
-
-                        <button id="nextButton" class="flex items-center gap-2 text-white hover:opacity-90 rounded-xl p-6 text-lg font-bold shadow-md hover:shadow-lg transition-all bg-pink-500">
-                            Następny
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
-                        </button>
-                    </div>
-                </div>
+            <div id="sampleProblem" class="problem-well">
+                Maria ma 24 cukierki. Chce je równo podzielić między siebie i przyjaciół na swoim przyjęciu urodzinowym. Jeśli każda osoba dostanie 4 cukierki, ilu przyjaciół Maria może zaprosić na swoje przyjęcie?
             </div>
-        </div>
-
-        <div id="summaryView" class="mt-8 border-4 border-green-400 rounded-xl shadow-xl overflow-hidden hidden">
-            <div class="bg-gradient-to-r from-green-100 to-teal-100">
-                <h2 class="flex items-center gap-2 text-2xl text-green-800 p-6">
-                    <span class="bg-green-500 text-white p-1 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
-                    </span>
-                    Twoja Niesamowita Przygoda z Rozwiązywaniem Problemów! 🎉
-                </h2>
+            <div class="hint-note">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <p><strong>Najpierw spróbuj samodzielnie.</strong> Przykładową odpowiedź możesz odkryć osobno przy każdym pytaniu.</p>
             </div>
-            <div id="summaryContent" class="p-6 bg-gradient-to-b from-white to-blue-50">
-                </div>
-        </div>
-    </div>
+        </section>
+
+        <section class="card" aria-label="Kroki metody Pólyi">
+            <div id="progressIndicator" class="progress-row"></div>
+            <div id="currentStepContent"></div>
+            <div class="main-nav">
+                <button id="previousButton" class="edu-btn-ghost">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    Poprzedni
+                </button>
+                <button id="resetButton" class="edu-btn-ghost is-danger edu-btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.76 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.76-2.74L21 16"/><path d="M21 21v-5h-5"/></svg>
+                    Zacznij od nowa
+                </button>
+                <button id="nextButton" class="edu-btn">
+                    Następny
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <section id="summaryView" class="card hidden" aria-labelledby="summaryHeading">
+            <div class="summary-head">
+                <span class="summary-check">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </span>
+                <h2 id="summaryHeading">Twoja przygoda z rozwiązywaniem problemów</h2>
+            </div>
+            <div id="summaryContent"></div>
+        </section>
+    </main>
 
     <script>
+        // ─── Constants ───
         const steps = [
             {
                 title: "Zrozumienie Problemu",
@@ -105,9 +386,8 @@
                     { id: "u4", text: "Czy możesz przeformułować problem własnymi słowami?" }
                 ],
                 key: "understanding",
-                // icon: Search, // Replaced with emoji/SVG if needed
-                color: "bg-pink-500",
-                emoji: "🔍"
+                tone: "tone-sky",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>'
             },
             {
                 title: "Opracowanie Planu",
@@ -118,9 +398,8 @@
                     { id: "p4", text: "Jakie narzędzia lub metody mogą pomóc?" }
                 ],
                 key: "planning",
-                // icon: Lightbulb,
-                color: "bg-yellow-400",
-                emoji: "💡"
+                tone: "tone-sun",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>'
             },
             {
                 title: "Realizacja Planu",
@@ -131,9 +410,8 @@
                     { id: "e4", text: "Co może pójść nie tak?" }
                 ],
                 key: "execution",
-                // icon: Pencil,
-                color: "bg-teal-500",
-                emoji: "✏️"
+                tone: "tone-grass",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>'
             },
             {
                 title: "Spojrzenie Wstecz",
@@ -144,9 +422,8 @@
                     { id: "r4", text: "Czego nauczyłeś się z tego problemu?" }
                 ],
                 key: "reflection",
-                // icon: EyeIcon,
-                color: "bg-purple-500",
-                emoji: "👀"
+                tone: "tone-grape",
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>'
             }
         ];
 
@@ -171,11 +448,13 @@
             "r4": "Nauczyłem się, że w zadaniach z dzieleniem z udziałem ludzi, czasami muszę pamiętać, czy osoba dzieląca jest wliczona do całkowitej liczby osób!"
         };
 
+        // ─── State ───
         let currentStep = 0;
         let responses = {};
         let currentQuestionByStep = steps.map(() => 0);
         let revealedExamples = {};
 
+        // ─── DOM refs ───
         const progressIndicatorEl = document.getElementById('progressIndicator');
         const currentStepContentEl = document.getElementById('currentStepContent');
         const previousButton = document.getElementById('previousButton');
@@ -184,6 +463,7 @@
         const summaryView = document.getElementById('summaryView');
         const summaryContent = document.getElementById('summaryContent');
 
+        // ─── Helpers ───
         function escapeHtml(value) {
             return value.replace(/[&<>"']/g, character => ({
                 '&': '&amp;',
@@ -194,32 +474,19 @@
             })[character]);
         }
 
+        // ─── Render ───
         function renderProgressIndicator() {
             progressIndicatorEl.innerHTML = steps.map((step, index) => `
                 <button
                     data-index="${index}"
-                    class="flex-1 text-center relative cursor-pointer hover:opacity-80 transition-transform hover:scale-105 transform ${
-                        index === currentStep ? 'font-bold' : ''
-                    }"
+                    class="progress-step ${index === currentStep ? 'is-current' : ''} ${index < currentStep ? 'is-done' : ''}"
                 >
-                    <div class="flex flex-col items-center gap-1">
-                        <div class="rounded-full w-14 h-14 flex items-center justify-center ${step.color} transition-all duration-300 shadow-md ${
-                            index === currentStep ? 'ring-4 ring-indigo-300 scale-110' : ''
-                        }">
-                            <span class="text-xl">${step.emoji}</span>
-                        </div>
-                        <div class="text-sm mb-1 font-medium mt-1" style="color: ${index === currentStep ? '#4F46E5' : '#6366F1'};">${step.title}</div>
-                    </div>
-                    <div class="h-3 bg-gray-200 rounded-full relative mt-1">
-                        <div
-                            class="absolute left-0 top-0 h-full rounded-full transition-all ${step.color}
-                            ${index <= currentStep ? 'w-full' : 'w-0'}"
-                        />
-                    </div>
+                    <div class="step-dot ${step.tone}">${step.icon}</div>
+                    <div class="step-label">${step.title}</div>
+                    <div class="step-track"><div class="step-fill ${step.tone}"></div></div>
                 </button>
             `).join('');
 
-            // Add event listeners to newly rendered buttons
             progressIndicatorEl.querySelectorAll('button').forEach(button => {
                 button.addEventListener('click', (e) => {
                     setCurrentStep(parseInt(e.currentTarget.dataset.index));
@@ -233,20 +500,16 @@
             const question = currentStepData.questions[currentQuestionIndex];
             const isExampleRevealed = revealedExamples[question.id];
             currentStepContentEl.innerHTML = `
-                <div class="flex items-center gap-3 bg-gradient-to-r from-pink-100 to-indigo-100 p-4 rounded-lg">
-                    <div class="rounded-full p-3 ${currentStepData.color} shadow-md">
-                        <span class="text-2xl">${currentStepData.emoji}</span>
-                    </div>
-                    <h3 class="text-2xl font-bold text-indigo-800">
-                        Krok ${currentStep + 1}: ${currentStepData.title}
-                    </h3>
+                <div class="step-head">
+                    <div class="step-dot ${currentStepData.tone}">${currentStepData.icon}</div>
+                    <h3>Krok ${currentStep + 1}: ${currentStepData.title}</h3>
                 </div>
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-indigo-50 rounded-lg border-2 border-indigo-100">
+                <div class="step-progress">
                     <div>
-                        <div class="text-xs uppercase tracking-wide font-bold text-indigo-500">Postęp w tym kroku</div>
-                        <div class="font-bold text-indigo-800">Pytanie ${currentQuestionIndex + 1} z ${currentStepData.questions.length}</div>
+                        <div class="step-progress-label">Postęp w tym kroku</div>
+                        <div class="step-progress-count">Pytanie ${currentQuestionIndex + 1} z ${currentStepData.questions.length}</div>
                     </div>
-                    <div class="flex flex-wrap gap-2" role="navigation" aria-label="Pytania w kroku ${currentStep + 1}">
+                    <div class="question-pips" role="navigation" aria-label="Pytania w kroku ${currentStep + 1}">
                         ${currentStepData.questions.map((item, index) => {
                             const isCurrent = index === currentQuestionIndex;
                             const isAnswered = Boolean(responses[item.id]);
@@ -254,13 +517,7 @@
                                 <button
                                     type="button"
                                     data-question-index="${index}"
-                                    class="w-9 h-9 rounded-full font-bold transition-all ${
-                                        isCurrent
-                                            ? 'bg-indigo-600 text-white ring-4 ring-indigo-200'
-                                            : isAnswered
-                                                ? 'bg-green-500 text-white hover:bg-green-600'
-                                                : 'bg-white text-indigo-600 border-2 border-indigo-200 hover:border-indigo-400'
-                                    }"
+                                    class="question-pip ${isCurrent ? 'is-current' : isAnswered ? 'is-answered' : ''}"
                                     aria-label="Pytanie ${index + 1}${isAnswered ? ', odpowiedź zapisana' : ''}"
                                     ${isCurrent ? 'aria-current="true"' : ''}
                                 >${isAnswered && !isCurrent ? '✓' : index + 1}</button>
@@ -268,52 +525,46 @@
                         }).join('')}
                     </div>
                 </div>
-                <div class="question-enter space-y-4 p-5 border-4 border-blue-200 bg-blue-50 rounded-xl shadow-md">
-                    <div class="font-bold text-indigo-700 flex items-start gap-3 text-lg">
-                        <span class="flex-none bg-indigo-600 text-white rounded-full w-8 h-8 inline-flex items-center justify-center text-sm font-bold">${currentQuestionIndex + 1}</span>
-                        <span>${question.text}</span>
+                <div class="question-panel question-enter">
+                    <div class="question-title">
+                        <span class="question-number">${currentQuestionIndex + 1}</span>
+                        <span class="question-text">${question.text}</span>
                     </div>
                     <textarea
                         id="textarea-${question.id}"
-                        class="w-full h-32 bg-white border-2 border-blue-200 rounded-lg shadow-inner text-lg p-3 focus:border-indigo-400 focus:outline-none"
+                        class="answer"
                         placeholder="Napisz tutaj swoją super odpowiedź..."
                     >${escapeHtml(responses[question.id] || '')}</textarea>
 
-                    <div class="border-t-2 border-blue-100 pt-4">
+                    <div class="example-block">
                         <button
                             type="button"
                             data-toggle-example="${question.id}"
-                            class="inline-flex items-center gap-2 font-bold rounded-full px-4 py-2 transition-all ${
-                                isExampleRevealed
-                                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                    : 'bg-white text-green-700 border-2 border-green-300 hover:bg-green-50'
-                            }"
+                            class="example-toggle ${isExampleRevealed ? 'is-open' : ''}"
                             aria-expanded="${Boolean(isExampleRevealed)}"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
                             ${isExampleRevealed ? 'Ukryj przykładową odpowiedź' : 'Pokaż przykładową odpowiedź'}
                         </button>
                         ${isExampleRevealed && exampleResponses[question.id] ? `
-                            <div class="question-enter mt-3 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
-                                <div class="font-bold text-green-800 mb-2">Przykładowa odpowiedź — porównaj ją ze swoją:</div>
-                                <div class="text-green-700 italic whitespace-pre-wrap">
-                                    ${exampleResponses[question.id].replace(/\\n/g, '<br>')}
-                                </div>
+                            <div class="example-answer question-enter">
+                                <div class="example-answer-label">Przykładowa odpowiedź – porównaj ją ze swoją</div>
+                                <div class="example-answer-text">${exampleResponses[question.id].replace(/\\n/g, '<br>')}</div>
                             </div>
                         ` : ''}
                     </div>
 
-                    <div class="flex items-center justify-between gap-3 pt-2">
+                    <div class="question-nav">
                         <button
                             type="button"
                             data-question-action="previous"
-                            class="rounded-lg px-4 py-2 font-bold text-indigo-600 bg-white border-2 border-indigo-200 hover:bg-indigo-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            class="edu-btn-ghost edu-btn-sm"
                             ${currentQuestionIndex === 0 ? 'disabled' : ''}
                         >← Poprzednie pytanie</button>
                         <button
                             type="button"
                             data-question-action="next"
-                            class="rounded-lg px-4 py-2 font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                            class="edu-btn edu-btn-sm"
                             ${currentQuestionIndex === currentStepData.questions.length - 1 ? 'disabled' : ''}
                         >Następne pytanie →</button>
                     </div>
@@ -356,41 +607,32 @@
                 return;
             }
 
-            summaryContent.innerHTML = `
-                <div class="space-y-8">
-                    ${steps.map((step, stepIndex) => {
-                        const hasResponsesForStep = step.questions.some(q => responses[q.id]);
-                        if (!hasResponsesForStep) return '';
+            summaryContent.innerHTML = steps.map(step => {
+                const hasResponsesForStep = step.questions.some(q => responses[q.id]);
+                if (!hasResponsesForStep) return '';
 
-                        return `
-                            <div class="space-y-4 bg-white p-4 rounded-xl border-2 border-indigo-100 shadow-md">
-                                <h4 class="text-xl font-bold flex items-center gap-2 text-indigo-700">
-                                    <div class="rounded-full p-2 ${step.color} shadow-sm">
-                                        <span class="text-xl">${step.emoji}</span>
+                return `
+                    <div class="summary-step">
+                        <h4 class="summary-step-title">
+                            <span class="step-dot ${step.tone}">${step.icon}</span>
+                            ${step.title}
+                        </h4>
+                        <div class="summary-answers">
+                            ${step.questions.map(question => `
+                                ${responses[question.id] ? `
+                                    <div class="summary-answer">
+                                        <div class="summary-question">${question.text}</div>
+                                        <p class="summary-response">${escapeHtml(responses[question.id])}</p>
                                     </div>
-                                    ${step.title}
-                                </h4>
-                                <div class="space-y-6 pl-6 border-l-4 border-indigo-200">
-                                    ${step.questions.map(question => `
-                                        ${responses[question.id] ? `
-                                            <div class="space-y-2 bg-blue-50 p-4 rounded-xl border-2 border-blue-200">
-                                                <div class="font-bold text-blue-800">
-                                                    ${question.text}
-                                                </div>
-                                                <p class="text-blue-700 whitespace-pre-wrap p-3 bg-white rounded-lg border-2 border-blue-100 shadow-inner text-lg">
-                                                    ${escapeHtml(responses[question.id])}
-                                                </p>
-                                            </div>
-                                        ` : ''}
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
+                                ` : ''}
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
+        // ─── Listeners / state transitions ───
         function handleInputChange(questionId, value) {
             if (value.trim()) {
                 responses[questionId] = value;
@@ -433,14 +675,9 @@
             nextButton.disabled = currentStep === steps.length - 1;
 
             if (currentStep === steps.length - 1) {
-                nextButton.innerHTML = `Gotowe! <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>`;
-                nextButton.classList.remove(steps[currentStep].color);
-                nextButton.classList.add('bg-indigo-500'); // Or a final color
+                nextButton.innerHTML = `Gotowe! <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
             } else {
-                nextButton.innerHTML = `Następny <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>`;
-                // Remove previous step's color and add current step's color
-                steps.forEach(step => nextButton.classList.remove(step.color));
-                nextButton.classList.add(steps[currentStep].color);
+                nextButton.innerHTML = `Następny <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`;
             }
         }
 
@@ -450,11 +687,10 @@
             renderSummary();
         }
 
-        // Initial render
+        // ─── Init ───
         document.addEventListener('DOMContentLoaded', () => {
             renderAll();
 
-            // Attach event listeners to navigation buttons
             previousButton.addEventListener('click', handlePrevious);
             nextButton.addEventListener('click', handleNext);
             resetButton.addEventListener('click', handleReset);
