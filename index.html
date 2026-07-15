@@ -113,6 +113,13 @@
         }
         .edu-lead { font-size: 1.0625rem; color: var(--ink-2); max-width: 36rem; margin: 14px auto 0; }
 
+        /* ─── Type scale ─── */
+        .edu-h2 { font-family: var(--font-display); font-weight: 600; font-size: 33px; line-height: 1.12; letter-spacing: -.015em; color: var(--ink); }
+        .edu-h3 { font-family: var(--font-display); font-weight: 600; font-size: 25px; line-height: 1.2; letter-spacing: -.01em; color: var(--ink); }
+        .edu-h4 { font-family: var(--font-sans); font-weight: 700; font-size: 19px; line-height: 1.3; color: var(--ink); }
+        .edu-p { font-family: var(--font-sans); font-weight: 400; font-size: 16px; line-height: 1.6; color: var(--ink-2); }
+        .edu-small { font-family: var(--font-sans); font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+
         /* ─── Cards ─── */
         .card {
             background: var(--surface);
@@ -407,6 +414,22 @@
         st('no em-dashes in authored content', () => {
             assert(!JSON.stringify(PROBLEMS).includes('—'), 'em-dash found');
         });
+        st('warmup advances through questions then to interstitial', () => {
+            STATE.warmup.responses = { w1: 'a', w2: 'b', w3: 'c' };
+            warmupNext(); assert(STATE.warmup.questionIndex === 1, 'q2');
+            warmupNext(); assert(STATE.warmup.questionIndex === 2, 'q3');
+            warmupNext(); assert(STATE.screen === 'interstitial', 'interstitial after last');
+        });
+        st('warmup renders brief and current question', () => {
+            TESTING = false; STATE.screen = 'warmup'; renderAll(); TESTING = true;
+            assert(screenRoot.innerHTML.includes('Maria ma 24 cukierki'), 'brief verbatim');
+            assert(screenRoot.innerHTML.includes(WARMUP.questions[0].text), 'question 1');
+        });
+        st('interstitial names the contrast and offers the flagship', () => {
+            TESTING = false; STATE.screen = 'interstitial'; renderAll(); TESTING = true;
+            assert(screenRoot.innerHTML.includes('zadanie szkolne'), 'contrast copy');
+            assert(screenRoot.querySelector('[data-action="start-flagship"]'), 'CTA present');
+        });
 
         // ─── Constants ───
         const FLOW = ['warmup', 'interstitial', 'investigate', 'checkpoint', 'plan', 'execute', 'lookback', 'summary'];
@@ -418,6 +441,13 @@
                 'ledger.title': 'Dziennik założeń', 'ledger.empty': 'Brak założeń – jeszcze.',
                 'ledger.add': 'Zapisz założenie',
                 'placeholder.screen': 'Ekran w budowie',
+                'warmup.eyebrow': 'Rozgrzewka · zadanie szkolne',
+                'warmup.hint': 'To zwykłe zadanie – wszystkie dane są podane. Rozwiąż je szybko.',
+                'interstitial.title': 'To było zadanie szkolne',
+                'interstitial.body': 'Miałeś wszystkie dane i istniała jedna dobra odpowiedź. Prawdziwe problemy takie nie są: czegoś zawsze brakuje i nie ma jednej dobrej odpowiedzi. Gotowy na prawdziwy problem?',
+                'interstitial.cta': 'Pokaż prawdziwy problem',
+                'warmup.example.show': 'Pokaż przykładową odpowiedź',
+                'warmup.example.hide': 'Ukryj przykładową odpowiedź',
             },
             en: {
                 'nav.next': 'Next', 'nav.prev': 'Previous', 'nav.reset': 'Start over',
@@ -425,6 +455,13 @@
                 'ledger.title': 'Assumption ledger', 'ledger.empty': 'No assumptions – yet.',
                 'ledger.add': 'Save assumption',
                 'placeholder.screen': 'Screen under construction',
+                'warmup.eyebrow': 'Warm-up · a school exercise',
+                'warmup.hint': 'A regular exercise – all the data is given. Solve it quickly.',
+                'interstitial.title': 'That was a school exercise',
+                'interstitial.body': 'You had all the data and there was one right answer. Real problems are not like that: something is always missing and there is no single right answer. Ready for a real one?',
+                'interstitial.cta': 'Show me a real problem',
+                'warmup.example.show': 'Show an example answer',
+                'warmup.example.hide': 'Hide the example answer',
             },
         };
         const PROBLEMS = [
@@ -556,6 +593,62 @@
                 screenRoot.innerHTML = `<section class="card"><p class="edu-p">${t('placeholder.screen')}: ${screen}</p></section>`;
             };
         });
+        function warmupNext() {
+            if (STATE.warmup.questionIndex < WARMUP.questions.length - 1) {
+                STATE.warmup.questionIndex++;
+                persist();
+                if (!TESTING) renderAll();
+            } else {
+                go('interstitial');
+            }
+        }
+
+        RENDER.warmup = () => {
+            const i = STATE.warmup.questionIndex;
+            const q = WARMUP.questions[i];
+            const revealed = STATE.warmup.exampleRevealed[q.id];
+            screenRoot.innerHTML = `
+                <section class="card">
+                    <div class="card-eyebrow"><span class="edu-overline">${t('warmup.eyebrow')}</span></div>
+                    <div class="problem-well">${WARMUP.brief}</div>
+                    <div class="hint-note"><p>${t('warmup.hint')}</p></div>
+                    <div class="question-panel question-enter">
+                        <div class="question-title">
+                            <span class="question-number">${i + 1}</span>
+                            <span class="question-text">${q.text}</span>
+                        </div>
+                        <textarea class="answer" id="warmup-answer">${escapeHtml(STATE.warmup.responses[q.id] || '')}</textarea>
+                        <div class="example-block">
+                            <button type="button" class="example-toggle ${revealed ? 'is-open' : ''}" data-action="toggle-example"
+                                aria-expanded="${Boolean(revealed)}">${revealed ? t('warmup.example.hide') : t('warmup.example.show')}</button>
+                            ${revealed ? `<div class="example-answer question-enter"><div class="example-answer-text">${q.example}</div></div>` : ''}
+                        </div>
+                        <div class="question-nav">
+                            <span></span>
+                            <button type="button" class="edu-btn edu-btn-sm" data-action="warmup-next">${t('nav.next')} →</button>
+                        </div>
+                    </div>
+                </section>`;
+            screenRoot.querySelector('#warmup-answer').addEventListener('input', e => {
+                STATE.warmup.responses[q.id] = e.target.value; persist();
+            });
+            screenRoot.querySelector('[data-action="toggle-example"]').addEventListener('click', () => {
+                STATE.warmup.exampleRevealed[q.id] = !STATE.warmup.exampleRevealed[q.id]; renderAll();
+            });
+            screenRoot.querySelector('[data-action="warmup-next"]').addEventListener('click', warmupNext);
+        };
+
+        RENDER.interstitial = () => {
+            screenRoot.innerHTML = `
+                <section class="card" style="text-align:center">
+                    <p class="edu-overline">${t('warmup.eyebrow')}</p>
+                    <h2 class="edu-h2" style="margin-top:12px">${t('interstitial.title')}</h2>
+                    <p class="edu-p" style="max-width:36rem;margin:14px auto 22px">${t('interstitial.body')}</p>
+                    <button type="button" class="edu-btn" data-action="start-flagship">${t('interstitial.cta')}</button>
+                </section>`;
+            screenRoot.querySelector('[data-action="start-flagship"]').addEventListener('click', () => go('investigate'));
+        };
+
         function renderAll() { RENDER[STATE.screen](); }
 
         // ─── Init ───
