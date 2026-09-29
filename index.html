@@ -6,62 +6,93 @@
     <title>Polya Framework · edulab</title>
     <style>
         /* ============================================================
-           edulab — Colors & Type foundation (design tokens)
+           edulab - Colors & Type foundation (edustyl tokens)
            ============================================================ */
-        @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
 
         :root {
-            --font-display: 'Bricolage Grotesque', 'Hanken Grotesk', system-ui, sans-serif;
-            --font-sans:    'Hanken Grotesk', system-ui, -apple-system, sans-serif;
-            --font-mono:    'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+            /* ---- Brand fonts ---- */
+            --font-display: 'Outfit', 'IBM Plex Sans', system-ui, sans-serif;
+            --font-sans:    'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+            --font-mono:    'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-            --paper:    #FBF7F0;
-            --paper-2:  #F4EDDF;
-            --paper-3:  #ECE1CF;
+            /* Paper - page background is white; the sand steps are wells/alternating sections */
+            --paper:    #FFFFFF;
+            --paper-2:  #FBF7E6;
+            --paper-3:  #F5EDCB;
             --surface:  #FFFFFF;
 
-            --ink:      #211E1A;
-            --ink-2:    #5B554D;
-            --ink-3:    #938A7C;
-            --line:     #E7DCCB;
-            --line-2:   #D6C8B2;
+            /* Ink - warm near-black text & lines */
+            --ink:      #1C1917;
+            --ink-2:    #57534E;
+            --ink-3:    #948C82;
+            --line:     #EDE7D2;
+            --line-2:   #DDD4B6;
 
-            --marigold:      #E8920C;
-            --marigold-600:  #CE800A;
-            --marigold-soft: #FBE7C2;
-            --marigold-ink:  #8A4F00;
+            /* Yellow primary · Blue + Green secondary · Red danger (-soft = solid fill, -ink = text on it) */
+            --yellow:      #FFD500;  --yellow-600: #F0C800;  --yellow-soft: #FFD500;  --yellow-ink: #1C1917;
+            --blue:        #1E8FC2;  --blue-600:   #177AA8;  --blue-soft:   #1E8FC2;  --blue-ink:   #FFFFFF;
+            --green:       #00A651;  --green-600:  #009444;  --green-soft:  #00A651;  --green-ink:  #FFFFFF;
+            --red:         #E5322D;  --red-600:    #C92823;  --red-soft:    #E5322D;  --red-ink:    #FFFFFF;
 
-            --teal:      #0E8C7F;
-            --teal-600:  #0B7468;
-            --teal-soft: #D2EBE6;
-            --teal-ink:  #0A5A52;
+            /* Legacy role aliases */
+            --marigold: var(--yellow); --marigold-600: var(--yellow-600); --marigold-soft: var(--yellow-soft); --marigold-ink: var(--yellow-ink);
+            --teal:     var(--blue);   --teal-600:     var(--blue-600);   --teal-soft:     var(--blue-soft);   --teal-ink:     var(--blue-ink);
+            --sky:      var(--green);                                     --sky-soft:      var(--green-soft);  --sky-ink:      var(--green-ink);
+            --coral:    var(--red);    --coral-600:    var(--red-600);    --coral-soft:    var(--red-soft);    --coral-ink:    var(--red-ink);
 
-            --coral:      #EF5B3F;
-            --coral-600:  #D44A30;
-            --coral-soft: #FBDDD4;
-            --coral-ink:  #9A2E1B;
+            /* Play palette */
+            --play-sun: #FFD500; --play-grass: #00A651; --play-berry: #C6478B;
+            --play-grape: #7A5AC2; --play-sky: #1E8FC2; --play-coral: #E5322D;
 
-            --sky:      #2E78C9;
-            --sky-soft: #D9E7F6;
-            --sky-ink:  #1B4E88;
+            /* Semantic */
+            --success: #00A651;  --success-soft: #00A651;  --success-ink: #FFFFFF;
+            --warning: #FFD500;  --warning-soft: #FFD500;  --warning-ink: #1C1917;
+            --danger:  #E5322D;  --danger-soft:  #E5322D;  --danger-ink:  #FFFFFF;
+            --info:    #1E8FC2;  --info-soft:    #1E8FC2;  --info-ink:    #FFFFFF;
 
-            --play-sun:    #F2A516;
-            --play-grass:  #4FA45C;
-            --play-berry:  #C6478B;
-            --play-grape:  #7A5AC2;
-            --play-sky:    #2E78C9;
+            /* Functional aliases */
+            --bg: var(--paper); --fg: var(--ink); --fg-muted: var(--ink-2);
+            --primary: var(--yellow);
+            --on-primary: #1C1917;
+            --focus-ring: 0 0 0 3px color-mix(in srgb, var(--yellow) 45%, transparent);
 
-            --success:      #2F8F5B;  --success-soft: #D7EEDD;  --success-ink: #1C6A3E;
+            /* Spacing (4pt base) */
+            --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+            --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+            --sp-12: 48px; --sp-16: 64px; --sp-20: 80px; --sp-24: 96px;
 
-            --focus-ring: 0 0 0 3px rgba(232,146,12,.38);
-
+            /* Radii */
             --r-xs: 6px; --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px; --r-pill: 999px;
 
+            /* Elevation - warm, low, soft */
             --shadow-sm: 0 1px 2px rgba(33,30,26,.06), 0 1px 1px rgba(33,30,26,.04);
             --shadow-md: 0 4px 16px rgba(33,30,26,.08), 0 1px 3px rgba(33,30,26,.05);
             --shadow-lg: 0 16px 40px rgba(33,30,26,.12), 0 3px 8px rgba(33,30,26,.06);
-            --shadow-marigold: 0 8px 22px rgba(232,146,12,.28);
+            --shadow-primary:  0 8px 22px color-mix(in srgb, var(--yellow) 30%, transparent);
+            --shadow-marigold: var(--shadow-primary);
+
+            /* Type scale */
+            --display-font: clamp(48px, 6vw, 72px);
+            --h1: 44px; --h2: 33px; --h3: 25px; --h4: 19px;
+            --body-lg: 18px; --body: 16px; --body-sm: 14px;
+            --caption: 13px; --overline: 12px;
         }
+
+        /* ─── Semantic type (element defaults sit in :where() so any class wins) ─── */
+        :where(.edu) h1, .edu-h1 { font-family: var(--font-display); font-weight: 700; font-size: var(--h1); line-height: 1.06; letter-spacing: -.02em; color: var(--ink); }
+        :where(.edu) h2, .edu-h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--h2); line-height: 1.12; letter-spacing: -.015em; color: var(--ink); }
+        :where(.edu) h3, .edu-h3 { font-family: var(--font-display); font-weight: 600; font-size: var(--h3); line-height: 1.2; letter-spacing: -.01em; color: var(--ink); }
+        :where(.edu) h4, .edu-h4 { font-family: var(--font-sans); font-weight: 700; font-size: var(--h4); line-height: 1.3; color: var(--ink); }
+        :where(.edu) p, .edu-p { font-family: var(--font-sans); font-weight: 400; font-size: var(--body); line-height: 1.6; color: var(--ink-2); }
+        .edu-body-lg { font-family: var(--font-sans); font-size: var(--body-lg); line-height: 1.6; color: var(--ink-2); }
+        .edu-small { font-family: var(--font-sans); font-size: var(--body-sm); line-height: 1.5; color: var(--ink-2); }
+        .edu-overline {
+            font-family: var(--font-mono); font-weight: 500; font-size: var(--overline);
+            letter-spacing: .14em; text-transform: uppercase; color: var(--ink);
+        }
+        .edu-block, .edu-block h1, .edu-block h2, .edu-block h3, .edu-block h4, .edu-block p,
+        .edu-block li, .edu-block small { color: inherit; }
 
         /* ─── Base ─── */
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -69,7 +100,7 @@
             background: var(--paper);
             color: var(--ink);
             font-family: var(--font-sans);
-            font-size: 16px;
+            font-size: var(--body);
             line-height: 1.6;
         }
         button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
@@ -79,46 +110,39 @@
         /* ─── Branded top menu (shared edulab chrome) ─── */
         .edu-header {
             position: sticky; top: 0; z-index: 50; width: 100%;
-            background: rgba(251, 247, 240, 0.85);
+            background: color-mix(in srgb, var(--paper) 85%, transparent);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--line);
         }
         .edu-header-inner {
             max-width: 1100px; margin: 0 auto;
-            padding: 15px 30px; display: flex; align-items: center; gap: 12px;
+            padding: 8px 30px; display: flex; align-items: center; gap: 12px;
         }
-        .edu-logo { width: 32px; height: 32px; display: block; }
+        .edu-logo { width: 64px; height: 64px; display: block; margin-right: -6px; }
         .edu-wordmark { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -.02em; color: var(--ink); }
-        .edu-tag {
-            font-family: var(--font-mono); font-weight: 500; font-size: 11px;
-            letter-spacing: .14em; text-transform: uppercase; color: var(--teal-ink);
-            background: var(--teal-soft); padding: 4px 9px; border-radius: var(--r-pill);
+
+        /* ─── Language switch (sand track, full pills) ─── */
+        .edu-seg { display: inline-flex; gap: 2px; padding: 3px; margin-left: auto; background: var(--paper-2); border-radius: var(--r-pill); }
+        .edu-seg button {
+            padding: 7px 14px; border-radius: var(--r-pill);
+            font-family: var(--font-sans); font-weight: 600; font-size: var(--body-sm); color: var(--ink-2);
+            transition: background .15s ease, color .15s ease;
         }
+        .edu-seg button:hover { color: var(--ink); }
+        .edu-seg button.active { background: var(--yellow); color: var(--yellow-ink); }
 
         /* ─── Layout shell ─── */
-        .shell { max-width: 920px; margin: 0 auto; padding: 44px 30px 70px; }
+        .shell { max-width: 1100px; margin: 0 auto; padding: 34px 30px 70px; }
         .shell > * + * { margin-top: 28px; }
 
-        /* ─── Page header scheme (eyebrow → title → lead) ─── */
-        .page-header { text-align: center; padding: 12px 0 8px; }
-        .edu-overline {
-            font-family: var(--font-mono); font-weight: 500; font-size: 12px;
-            letter-spacing: .14em; text-transform: uppercase; color: var(--marigold-ink);
-        }
+        /* ─── Page header (solid title → full-width lead) ─── */
+        .page-header { text-align: center; padding: 12px 0 18px; }
         .app-title {
             font-family: var(--font-display); font-weight: 800;
             font-size: clamp(2rem, 4.5vw, 2.85rem); letter-spacing: -.025em;
             line-height: 1.05; color: var(--ink);
-            margin-top: 12px;
         }
-        .edu-lead { font-size: 1.0625rem; color: var(--ink-2); max-width: 36rem; margin: 14px auto 0; }
-
-        /* ─── Type scale ─── */
-        .edu-h2 { font-family: var(--font-display); font-weight: 600; font-size: 33px; line-height: 1.12; letter-spacing: -.015em; color: var(--ink); }
-        .edu-h3 { font-family: var(--font-display); font-weight: 600; font-size: 25px; line-height: 1.2; letter-spacing: -.01em; color: var(--ink); }
-        .edu-h4 { font-family: var(--font-sans); font-weight: 700; font-size: 19px; line-height: 1.3; color: var(--ink); }
-        .edu-p { font-family: var(--font-sans); font-weight: 400; font-size: 16px; line-height: 1.6; color: var(--ink-2); }
-        .edu-small { font-family: var(--font-sans); font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+        .edu-lead { font-size: 1.0625rem; color: var(--ink-2); margin: 14px 0 0; }
 
         /* ─── Cards ─── */
         .card {
@@ -128,122 +152,97 @@
             box-shadow: var(--shadow-md);
             padding: 30px 34px;
         }
-        .card-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-        .card-eyebrow svg { color: var(--marigold); flex: none; }
+        .card-title {
+            font-family: var(--font-display); font-weight: 700; font-size: var(--h3);
+            line-height: 1.2; letter-spacing: -.015em; color: var(--ink);
+            margin-bottom: 18px;
+        }
 
         .problem-well {
-            background: var(--marigold-soft);
-            color: var(--marigold-ink);
+            background: var(--yellow-soft);
+            color: var(--yellow-ink);
             border-radius: var(--r-lg);
             padding: 22px 26px;
             font-family: var(--font-display);
             font-weight: 600;
-            font-size: 19px;
+            font-size: var(--h4);
             line-height: 1.45;
             text-align: center;
         }
         .hint-note {
             display: flex; align-items: flex-start; gap: 12px;
             margin-top: 16px; padding: 14px 18px;
-            background: var(--sky-soft); color: var(--sky-ink);
+            background: var(--blue-soft); color: var(--blue-ink);
             border-radius: var(--r-md);
-            font-size: 14.5px; line-height: 1.55;
         }
-        .hint-note svg { flex: none; margin-top: 2px; }
+        .hint-note p { font-size: 14.5px; line-height: 1.55; }
 
         /* ─── Progress indicator ─── */
+        #progressBar { margin-bottom: 22px; }
         .progress-row { display: flex; gap: 14px; }
-        .progress-step { flex: 1; text-align: center; transition: opacity .15s ease; }
+        .progress-step { flex: 1; min-width: 0; display: flex; flex-direction: column; text-align: center; transition: opacity .15s ease; }
         .progress-step:hover { opacity: .8; }
         .step-label {
             font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em;
             text-transform: uppercase; color: var(--ink-3);
-            margin-top: 10px; line-height: 1.35;
+            margin-top: 10px; line-height: 1.35; flex: 1;
         }
         .progress-step.is-current .step-label { color: var(--ink); font-weight: 500; }
         .step-track {
             height: 5px; background: var(--paper-3); border-radius: var(--r-pill);
             margin-top: 10px; overflow: hidden;
         }
-        .step-fill { height: 100%; border-radius: var(--r-pill); width: 0; transition: width .3s ease; }
+        .step-fill { height: 100%; border-radius: var(--r-pill); width: 0; background: var(--yellow); transition: width .3s ease; }
         .progress-step.is-done .step-fill, .progress-step.is-current .step-fill { width: 100%; }
+        .progress-caption { display: none; font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em;
+                            text-transform: uppercase; color: var(--ink); text-align: center; margin-top: 10px; }
 
-        /* ─── Step content ─── */
-        .step-head { display: flex; align-items: center; gap: 14px; margin-top: 26px; }
-        .step-head h3 {
-            font-family: var(--font-display); font-weight: 600; font-size: 25px;
-            letter-spacing: -.01em; color: var(--ink);
-        }
-
-        .step-progress {
-            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px;
-            margin-top: 18px; padding: 14px 18px;
-            background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-md);
-        }
-        .step-progress-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
-        .step-progress-count { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--ink); margin-top: 2px; }
-        .question-pips { display: flex; flex-wrap: wrap; gap: 8px; }
-        .question-pip {
-            width: 36px; height: 36px; border-radius: var(--r-pill);
-            font-family: var(--font-mono); font-weight: 500; font-size: 14px;
-            display: inline-flex; align-items: center; justify-content: center;
-            background: var(--surface); color: var(--ink-2);
-            border: 1px solid var(--line-2);
-            transition: background .15s ease, color .15s ease;
-        }
-        .question-pip:hover { border-color: var(--ink-3); }
-        .question-pip.is-answered { background: var(--success-soft); color: var(--success-ink); border-color: transparent; }
-        .question-pip.is-current { background: var(--marigold); color: #fff; border-color: transparent; }
-
+        /* ─── Question panels ─── */
         .question-panel {
             margin-top: 18px; padding: 24px 26px;
-            background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg);
+            background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--r-lg);
         }
         .question-panel > * + * { margin-top: 16px; }
         .question-title { display: flex; align-items: flex-start; gap: 12px; }
         .question-number {
             flex: none; width: 30px; height: 30px; border-radius: var(--r-pill);
-            background: var(--marigold); color: #fff;
-            font-family: var(--font-mono); font-size: 14px;
+            background: var(--yellow); color: var(--yellow-ink);
+            font-family: var(--font-mono); font-weight: 500; font-size: var(--body-sm);
             display: inline-flex; align-items: center; justify-content: center;
         }
-        .question-text { font-family: var(--font-display); font-weight: 600; font-size: 19px; line-height: 1.35; color: var(--ink); padding-top: 2px; }
+        .question-text { font-family: var(--font-display); font-weight: 600; font-size: var(--h4); line-height: 1.35; color: var(--ink); padding-top: 2px; }
 
         textarea.answer {
             width: 100%; min-height: 128px; resize: vertical;
             background: var(--surface); color: var(--ink);
             border: 1px solid var(--line-2); border-radius: var(--r-md);
-            padding: 14px 16px; font-family: var(--font-sans); font-size: 16px; line-height: 1.55;
+            padding: 14px 16px; font-family: var(--font-sans); font-size: var(--body); line-height: 1.55;
             transition: border-color .15s ease;
         }
         textarea.answer::placeholder { color: var(--ink-3); }
-        textarea.answer:focus { border-color: var(--marigold); }
+        textarea.answer:focus { border-color: var(--ink-3); }
 
         .persona-card { background: var(--surface); border: 1px solid var(--line);
-                        border-radius: var(--r-lg); padding: 18px 20px; margin-top: 12px; }
+                        border-radius: var(--r-lg); padding: 18px 20px; margin-top: 12px; box-shadow: var(--shadow-sm); }
         .persona-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--ink); }
         .persona-field { margin-top: 8px; font-size: 14.5px; color: var(--ink-2); }
         .persona-field .edu-overline { display: block; margin-bottom: 2px; }
 
-        .example-block { border-top: 1px solid var(--line); padding-top: 16px; }
+        .example-block { border-top: 1px dashed var(--line-2); padding-top: 16px; }
         .example-toggle {
             display: inline-flex; align-items: center; gap: 8px;
-            font-family: var(--font-display); font-weight: 600; font-size: 14px;
+            font-family: var(--font-display); font-weight: 600; font-size: var(--body-sm);
             padding: 9px 16px; border-radius: var(--r-pill);
-            background: var(--surface); color: var(--teal-ink);
+            background: var(--surface); color: var(--ink);
             border: 1px solid var(--line-2);
-            transition: background .15s ease;
+            transition: background .15s ease, color .15s ease;
         }
-        .example-toggle:hover { background: var(--teal-soft); }
-        .example-toggle.is-open { background: var(--teal-soft); border-color: transparent; }
+        .example-toggle:hover { background: var(--paper-3); }
+        .example-toggle.is-open { background: var(--blue); color: var(--blue-ink); border-color: var(--blue); }
         .example-answer {
             margin-top: 14px; padding: 18px 20px;
-            background: var(--teal-soft); color: var(--teal-ink);
+            background: var(--blue-soft); color: var(--blue-ink);
             border-radius: var(--r-md);
-        }
-        .example-answer-label {
-            font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em;
-            text-transform: uppercase; margin-bottom: 8px;
         }
         .example-answer-text { white-space: pre-wrap; font-size: 15px; line-height: 1.6; }
 
@@ -251,67 +250,60 @@
 
         /* ─── Investigate screen ─── */
         .fact-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-        .fact-chip { font-family: var(--font-mono); font-size: 12px; padding: 6px 12px;
-                     border-radius: var(--r-pill); background: var(--sky-soft); color: var(--sky-ink); }
+        .fact-chip { font-family: var(--font-mono); font-size: var(--overline); padding: 6px 12px;
+                     border-radius: var(--r-pill); background: var(--green-soft); color: var(--green-ink); }
         .inv-question { border: 1px solid var(--line); border-radius: var(--r-md);
-                        padding: 12px 16px; margin-top: 10px; background: var(--surface); }
+                        padding: 12px 16px; margin-top: 10px; background: var(--surface);
+                        transition: background .15s ease; }
+        .inv-question:has(button:not(:disabled)):hover { background: var(--paper-2); }
         .inv-question button { font-family: var(--font-sans); font-weight: 600; color: var(--ink);
                                width: 100%; text-align: left; }
-        .inv-question button:disabled { color: var(--ink-3); }
+        .inv-question button:disabled { opacity: 1; color: var(--ink-3); }
         .inv-answer { margin-top: 10px; padding: 12px 14px; border-radius: var(--r-sm);
-                      background: var(--paper); color: var(--ink-2); font-size: 15px; }
-        .inv-answer.is-unknown { background: var(--coral-soft); color: var(--coral-ink); font-weight: 600; }
-        .ledger-panel { position: sticky; top: 76px; background: var(--marigold-soft); color: var(--marigold-ink);
-                        border-radius: var(--r-lg); padding: 18px 20px; }
-        .ledger-panel h4 { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em;
-                           text-transform: uppercase; margin-bottom: 10px; }
-        .ledger-panel li { font-size: 14.5px; line-height: 1.5; margin-top: 6px; list-style: none; }
-        .inv-layout { display: grid; grid-template-columns: 1fr 260px; gap: 22px; align-items: start; }
-        @media (max-width: 768px) { .inv-layout { grid-template-columns: 1fr; } .ledger-panel { position: static; } }
+                      background: var(--paper-2); color: var(--ink-2); font-size: 15px; }
+        .inv-answer.is-unknown { background: var(--red-soft); color: var(--red-ink); font-weight: 600; }
+
+        /* Assumption ledger - dark data panel */
+        .ledger-panel { position: sticky; top: 96px; background: var(--ink); color: var(--paper);
+                        border-radius: var(--r-xl); padding: 22px 24px; }
+        .ledger-panel h4 { font-family: var(--font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em;
+                           text-transform: uppercase; color: color-mix(in srgb, var(--paper) 55%, transparent); margin-bottom: 6px; }
+        .ledger-panel li { font-size: 15px; line-height: 1.5; list-style: none; padding: 10px 0;
+                           border-top: 1px solid color-mix(in srgb, var(--paper) 14%, transparent); }
+        .ledger-panel li::marker { content: none; }
+        .ledger-panel li.is-empty { color: color-mix(in srgb, var(--paper) 55%, transparent); }
+        .ledger-bullet { color: var(--yellow); font-weight: 700; margin-right: 6px; }
+        .inv-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; align-items: start; }
 
         /* ─── Buttons ─── */
         .edu-btn {
             display: inline-flex; align-items: center; gap: 8px;
-            font-family: var(--font-display); font-weight: 600; font-size: 16px;
-            background: var(--marigold); color: #fff;
+            font-family: var(--font-display); font-weight: 600; font-size: var(--body);
+            background: var(--yellow); color: var(--on-primary);
             border-radius: var(--r-pill); padding: 12px 22px;
-            box-shadow: var(--shadow-marigold);
+            box-shadow: var(--shadow-primary);
             transition: background .15s ease, transform .12s cubic-bezier(.32,.72,.32,1);
         }
-        .edu-btn:hover:not(:disabled) { background: var(--marigold-600); }
+        .edu-btn:hover:not(:disabled) { background: var(--yellow-600); }
         .edu-btn:active:not(:disabled) { transform: scale(.96); }
 
         .edu-btn-ghost {
             display: inline-flex; align-items: center; gap: 8px;
-            font-family: var(--font-display); font-weight: 600; font-size: 16px;
+            font-family: var(--font-display); font-weight: 600; font-size: var(--body);
             background: var(--surface); color: var(--ink);
             border: 1px solid var(--line-2);
             border-radius: var(--r-pill); padding: 11px 21px;
-            transition: background .15s ease;
+            transition: background .15s ease, color .15s ease;
         }
         .edu-btn-ghost:hover:not(:disabled) { background: var(--paper-2); }
 
-        .edu-btn-sm { padding: 8px 16px; font-size: 14px; }
-        .edu-btn-ghost.is-danger { color: var(--coral-ink); }
-        .edu-btn-ghost.is-danger:hover:not(:disabled) { background: var(--coral-soft); border-color: transparent; }
-
-        .main-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 26px; }
+        .edu-btn-sm { padding: 8px 16px; font-size: var(--body-sm); }
+        .edu-btn-ghost.is-danger { color: var(--red); }
+        .edu-btn-ghost.is-danger:hover:not(:disabled) { background: var(--red); color: var(--red-ink); border-color: var(--red); }
 
         /* ─── Summary ─── */
-        .summary-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-        .summary-check {
-            flex: none; width: 40px; height: 40px; border-radius: var(--r-pill);
-            background: var(--success-soft); color: var(--success-ink);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .summary-head h2 { font-family: var(--font-display); font-weight: 600; font-size: 25px; letter-spacing: -.01em; color: var(--ink); }
-        .summary-step { padding: 20px 0; border-top: 1px solid var(--line); }
-        .summary-step:first-of-type { border-top: none; padding-top: 0; }
-        .summary-step-title { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 600; font-size: 19px; color: var(--ink); }
-        .summary-answers { margin-top: 14px; padding-left: 16px; border-left: 3px solid var(--line-2); display: grid; gap: 12px; }
-        .summary-answer { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px 18px; }
-        .summary-question { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
-        .summary-response { white-space: pre-wrap; color: var(--ink-2); font-size: 15px; line-height: 1.6; }
+        .summary-list { margin-top: 6px; }
+        .summary-list li { list-style: none; }
 
         .hidden { display: none; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -325,11 +317,16 @@
 
         /* ─── Responsive ─── */
         @media (max-width: 768px) {
-            .shell { padding: 28px 18px 56px; }
+            .edu-header-inner { padding: 6px 16px; }
+            .edu-logo { width: 48px; height: 48px; }
+            .shell { padding: 28px 16px 56px; }
             .card { padding: 22px 20px; border-radius: var(--r-lg); }
             .progress-row { gap: 8px; }
-            .step-label { font-size: 10px; }
-            .main-nav { flex-wrap: wrap; justify-content: center; }
+            .step-label { display: none; }
+            .progress-caption { display: block; }
+            .problem-well { font-size: 17px; padding: 18px 20px; }
+            .inv-layout { grid-template-columns: 1fr; }
+            .ledger-panel { position: static; }
         }
 
         @media print {
@@ -342,16 +339,17 @@
 <body class="edu">
     <header class="edu-header">
         <div class="edu-header-inner">
-            <img class="edu-logo" alt="edulab" src="data:image/png;base64,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">
+            <img class="edu-logo" alt="edulab" src="data:image/png;base64,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">
             <span class="edu-wordmark">edulab</span>
-            <span class="edu-tag">demo lab</span>
-            <button id="langToggle" class="edu-tag" style="margin-left:auto;cursor:pointer;border:none"></button>
+            <div id="langToggle" class="edu-seg" role="group" aria-label="Język / Language">
+                <button type="button" data-lang="pl" lang="pl">PL</button>
+                <button type="button" data-lang="en" lang="en">EN</button>
+            </div>
         </div>
     </header>
 
     <main class="shell">
         <header class="page-header">
-            <p class="edu-overline">Interaktywne narzędzie · Metoda Pólyi · 4 kroki</p>
             <h1 class="app-title">Przygoda z rozwiązywaniem problemów</h1>
             <p class="edu-lead">Przejdź przez cztery kroki metody George'a Pólyi: zrozum problem, opracuj plan, zrealizuj go i spójrz wstecz. Odpowiadaj na pytania pomocnicze, a na końcu zobaczysz podsumowanie swojej pracy.</p>
         </header>
@@ -553,7 +551,7 @@
         const T = {
             pl: {
                 'nav.next': 'Następny', 'nav.prev': 'Poprzedni', 'nav.reset': 'Zacznij od nowa',
-                'nav.done': 'Gotowe!', 'lang.toggle': 'EN',
+                'nav.done': 'Gotowe!',
                 'ledger.title': 'Dziennik założeń', 'ledger.empty': 'Brak założeń – jeszcze.',
                 'ledger.add': 'Zapisz założenie',
                 'placeholder.screen': 'Ekran w budowie',
@@ -599,7 +597,7 @@
             },
             en: {
                 'nav.next': 'Next', 'nav.prev': 'Previous', 'nav.reset': 'Start over',
-                'nav.done': 'Done!', 'lang.toggle': 'PL',
+                'nav.done': 'Done!',
                 'ledger.title': 'Assumption ledger', 'ledger.empty': 'No assumptions – yet.',
                 'ledger.add': 'Save assumption',
                 'placeholder.screen': 'Screen under construction',
@@ -744,16 +742,24 @@
         function t(key) { return (T[STATE.lang] && T[STATE.lang][key]) || T.pl[key] || key; }
         function tn(key, n) { return t(key).replace('{n}', n); }
         function announce(text) { if (liveRegion) liveRegion.textContent = text; }
-        function syncLangToggle() { langToggle.textContent = t('lang.toggle'); }
+        function syncLangToggle() {
+            document.documentElement.lang = STATE.lang;
+            langToggle.querySelectorAll('[data-lang]').forEach(b => {
+                const on = b.dataset.lang === STATE.lang;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-pressed', String(on));
+            });
+        }
         function renderProgress() {
             const labels = t('progress.labels').split('|');
             const current = PHASE_OF[STATE.screen];
-            progressBarEl.innerHTML = `<div class="progress-row" style="margin-bottom:22px">${
+            progressBarEl.innerHTML = `<div class="progress-row">${
                 labels.map((label, i) => `
                     <div class="progress-step ${i === current ? 'is-current' : ''} ${i < current ? 'is-done' : ''}">
                         <div class="step-label">${label}</div>
-                        <div class="step-track"><div class="step-fill" style="background:var(--marigold)"></div></div>
-                    </div>`).join('')}</div>`;
+                        <div class="step-track"><div class="step-fill"></div></div>
+                    </div>`).join('')}</div>
+                <div class="progress-caption">${current + 1}/${labels.length} · ${labels[current]}</div>`;
         }
         function canLeaveInvestigate() {
             return !STATE.investigation.crucialAsked || STATE.ledger.length >= 1;
@@ -803,9 +809,9 @@
             const revealed = STATE.warmup.exampleRevealed[q.id];
             screenRoot.innerHTML = `
                 <section class="card">
-                    <div class="card-eyebrow"><span class="edu-overline">${t('warmup.eyebrow')}</span></div>
+                    <h2 class="card-title">${t('warmup.eyebrow')}</h2>
                     <div class="problem-well">${WARMUP.brief}</div>
-                    <div class="hint-note"><p>${t('warmup.hint')}</p></div>
+                    <div class="hint-note edu-block"><p>${t('warmup.hint')}</p></div>
                     <div class="question-panel question-enter">
                         <div class="question-title">
                             <span class="question-number">${i + 1}</span>
@@ -815,7 +821,7 @@
                         <div class="example-block">
                             <button type="button" class="example-toggle ${revealed ? 'is-open' : ''}" data-action="toggle-example"
                                 aria-expanded="${Boolean(revealed)}">${revealed ? t('warmup.example.hide') : t('warmup.example.show')}</button>
-                            ${revealed ? `<div class="example-answer question-enter"><div class="example-answer-text">${q.example}</div></div>` : ''}
+                            ${revealed ? `<div class="example-answer edu-block question-enter"><div class="example-answer-text">${q.example}</div></div>` : ''}
                         </div>
                         <div class="question-nav">
                             <span></span>
@@ -835,9 +841,8 @@
         RENDER.interstitial = () => {
             screenRoot.innerHTML = `
                 <section class="card" style="text-align:center">
-                    <p class="edu-overline">${t('warmup.eyebrow')}</p>
-                    <h2 class="edu-h2" style="margin-top:12px">${t('interstitial.title')}</h2>
-                    <p class="edu-p" style="max-width:36rem;margin:14px auto 22px">${t('interstitial.body')}</p>
+                    <h2 class="edu-h2">${t('interstitial.title')}</h2>
+                    <p class="edu-body-lg" style="margin:14px auto 24px">${t('interstitial.body')}</p>
                     <button type="button" class="edu-btn" data-action="start-flagship">${t('interstitial.cta')}</button>
                 </section>`;
             screenRoot.querySelector('[data-action="start-flagship"]').addEventListener('click', () => go('investigate'));
@@ -863,8 +868,8 @@
         }
         function renderLedgerPanel() {
             const items = STATE.ledger.length
-                ? STATE.ledger.map(a => `<li>• ${escapeHtml(a.text)}</li>`).join('')
-                : `<li>${t('ledger.empty')}</li>`;
+                ? STATE.ledger.map(a => `<li><span class="ledger-bullet" aria-hidden="true">•</span>${escapeHtml(a.text)}</li>`).join('')
+                : `<li class="is-empty">${t('ledger.empty')}</li>`;
             return `<aside class="ledger-panel" aria-label="${t('ledger.title')}">
                 <h4>${t('ledger.title')}</h4><ul>${items}</ul></aside>`;
         }
@@ -873,7 +878,7 @@
             const needsAssumption = STATE.investigation.crucialAsked && STATE.ledger.length === 0;
             screenRoot.innerHTML = `
                 <section class="card">
-                    <div class="card-eyebrow"><span class="edu-overline">${t('inv.eyebrow')}</span></div>
+                    <h2 class="card-title">${t('inv.eyebrow')}</h2>
                     <div class="problem-well">${FLAGSHIP.brief}</div>
                     <div class="inv-layout" style="margin-top:18px">
                         <div>
@@ -915,10 +920,10 @@
             const gapUnnoticed = STATE.ledger.length === 0;
             screenRoot.innerHTML = `
                 <section class="card">
-                    <div class="card-eyebrow"><span class="edu-overline">${t('chk.title')}</span></div>
-                    <h3 class="edu-h3">${t('chk.question')}</h3>
+                    <h2 class="card-title">${t('chk.title')}</h2>
+                    <p class="question-text">${t('chk.question')}</p>
                     ${gapUnnoticed ? `
-                        <div class="hint-note" style="margin-top:16px"><p><strong>${FLAGSHIP.gapPrompt}</strong></p></div>
+                        <div class="hint-note edu-block" style="margin-top:16px"><p><strong>${FLAGSHIP.gapPrompt}</strong></p></div>
                         <div class="question-panel question-enter" style="margin-top:14px">
                             <textarea class="answer" id="assumption-input" style="min-height:64px"></textarea>
                             <button type="button" class="edu-btn edu-btn-sm" data-action="add-assumption">${t('ledger.add')}</button>
@@ -939,7 +944,7 @@
         RENDER.plan = () => {
             screenRoot.innerHTML = `
                 <section class="card">
-                    <div class="card-eyebrow"><span class="edu-overline">${t('plan.eyebrow')}</span></div>
+                    <h2 class="card-title">${t('plan.eyebrow')}</h2>
                     <div class="inv-layout">
                         <div>
                             ${FLAGSHIP.planPrompts.map((p, i) => `
@@ -968,7 +973,7 @@
             const assumptions = STATE.ledger.map(a => escapeHtml(a.text)).join('; ');
             screenRoot.innerHTML = `
                 <section class="card">
-                    <div class="card-eyebrow"><span class="edu-overline">${t('exec.eyebrow')}</span></div>
+                    <h2 class="card-title">${t('exec.eyebrow')}</h2>
                     <div class="inv-layout">
                         <div>
                             <div class="question-panel">
@@ -1002,8 +1007,8 @@
             const lb = STATE.lookback;
             screenRoot.innerHTML = `
                 <section class="card">
-                    <div class="card-eyebrow"><span class="edu-overline">${t('look.eyebrow')}</span></div>
-                    <h3 class="edu-h3">${t('look.sensTitle')}</h3>
+                    <h2 class="card-title">${t('look.eyebrow')}</h2>
+                    <h3 class="edu-h4">${t('look.sensTitle')}</h3>
                     ${FLAGSHIP.sensitivity.map((s, i) => `
                         <div class="question-panel" style="margin-top:14px">
                             <div class="question-title">
@@ -1013,7 +1018,7 @@
                             <textarea class="answer" data-sens="${s.id}" style="min-height:80px">${escapeHtml(lb.reactions[s.id] || '')}</textarea>
                         </div>`).join('')}
                     ${lb.galleryRevealed ? `
-                        <h3 class="edu-h3" style="margin-top:26px">${t('look.galleryTitle')}</h3>
+                        <h3 class="edu-h4" style="margin-top:28px">${t('look.galleryTitle')}</h3>
                         <p class="edu-p" style="margin-top:6px">${t('look.galleryNote')}</p>
                         ${FLAGSHIP.gallery.map(p => `
                             <div class="persona-card question-enter">
@@ -1049,10 +1054,10 @@
         RENDER.summary = () => {
             screenRoot.innerHTML = `
                 <section class="card" id="printArea">
-                    <div class="card-eyebrow"><span class="edu-overline">${t('sum.eyebrow')}</span></div>
+                    <h2 class="card-title">${t('sum.eyebrow')}</h2>
                     <div class="problem-well">${FLAGSHIP.brief}</div>
                     <h4 class="edu-h4" style="margin-top:18px">${t('sum.assumptions')}</h4>
-                    <ul style="margin-top:6px">${STATE.ledger.map(a => `<li class="edu-p">• ${escapeHtml(a.text)}</li>`).join('')}</ul>
+                    <ul class="summary-list">${STATE.ledger.map(a => `<li class="edu-p">• ${escapeHtml(a.text)}</li>`).join('')}</ul>
                     <h4 class="edu-h4" style="margin-top:18px">${t('sum.answer')}</h4>
                     <p class="edu-p" style="white-space:pre-wrap">${escapeHtml(STATE.execute.answer)}</p>
                     <h4 class="edu-h4" style="margin-top:18px">${t('sum.reflection')}</h4>
@@ -1081,8 +1086,10 @@
             if (e.key === 'ArrowRight' && order < FLOW.length - 1) go(FLOW[order + 1]);
             if (e.key === 'ArrowLeft' && order > 0) go(FLOW[order - 1]);
         });
-        langToggle.addEventListener('click', () => {
-            STATE.lang = STATE.lang === 'pl' ? 'en' : 'pl';
+        langToggle.addEventListener('click', e => {
+            const btn = e.target.closest('[data-lang]');
+            if (!btn || btn.dataset.lang === STATE.lang) return;
+            STATE.lang = btn.dataset.lang;
             persist(); syncLangToggle(); renderAll();
         });
 
