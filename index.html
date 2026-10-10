@@ -25,15 +25,15 @@
             /* Ink - warm near-black text & lines */
             --ink:      #1C1917;
             --ink-2:    #57534E;
-            --ink-3:    #948C82;
+            --ink-3:    #716961;
             --line:     #EDE7D2;
             --line-2:   #DDD4B6;
 
             /* Yellow primary · Blue + Green secondary · Red danger (-soft = solid fill, -ink = text on it) */
             --yellow:      #FFD500;  --yellow-600: #F0C800;  --yellow-soft: #FFD500;  --yellow-ink: #1C1917;
-            --blue:        #1E8FC2;  --blue-600:   #177AA8;  --blue-soft:   #1E8FC2;  --blue-ink:   #FFFFFF;
-            --green:       #00A651;  --green-600:  #009444;  --green-soft:  #00A651;  --green-ink:  #FFFFFF;
-            --red:         #E5322D;  --red-600:    #C92823;  --red-soft:    #E5322D;  --red-ink:    #FFFFFF;
+            --blue:        #1E8FC2;  --blue-600:   #177AA8;  --blue-soft:   #177AA8;  --blue-ink:   #FFFFFF;
+            --green:       #00A651;  --green-600:  #078342;  --green-soft:  #078342;  --green-ink:  #FFFFFF;
+            --red:         #E5322D;  --red-600:    #C92823;  --red-soft:    #C92823;  --red-ink:    #FFFFFF;
 
             /* Legacy role aliases */
             --marigold: var(--yellow); --marigold-600: var(--yellow-600); --marigold-soft: var(--yellow-soft); --marigold-ink: var(--yellow-ink);
@@ -46,16 +46,16 @@
             --play-grape: #7A5AC2; --play-sky: #1E8FC2; --play-coral: #E5322D;
 
             /* Semantic */
-            --success: #00A651;  --success-soft: #00A651;  --success-ink: #FFFFFF;
+            --success: #00A651;  --success-soft: #078342;  --success-ink: #FFFFFF;
             --warning: #FFD500;  --warning-soft: #FFD500;  --warning-ink: #1C1917;
-            --danger:  #E5322D;  --danger-soft:  #E5322D;  --danger-ink:  #FFFFFF;
-            --info:    #1E8FC2;  --info-soft:    #1E8FC2;  --info-ink:    #FFFFFF;
+            --danger:  #E5322D;  --danger-soft:  #C92823;  --danger-ink:  #FFFFFF;
+            --info:    #1E8FC2;  --info-soft:    #177AA8;  --info-ink:    #FFFFFF;
 
             /* Functional aliases */
             --bg: var(--paper); --fg: var(--ink); --fg-muted: var(--ink-2);
             --primary: var(--yellow);
             --on-primary: #1C1917;
-            --focus-ring: 0 0 0 3px color-mix(in srgb, var(--yellow) 45%, transparent);
+            --focus-ring: 0 0 0 2px var(--paper), 0 0 0 5px var(--ink);
 
             /* Spacing (4pt base) */
             --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
