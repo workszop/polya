@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Polya Framework · edulab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap">
     <style>
         /* ============================================================
            edulab - Colors & Type foundation (edustyl tokens)
            ============================================================ */
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
 
         :root {
             /* ---- Brand fonts ---- */
@@ -104,15 +106,14 @@
             line-height: 1.6;
         }
         button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-        button:focus-visible, textarea:focus-visible, a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+        button:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid transparent; outline-offset: 2px; box-shadow: var(--focus-ring); }
         button:disabled { opacity: .4; cursor: not-allowed; }
 
         /* ─── Branded top menu (shared edulab chrome) ─── */
         .edu-header {
             position: sticky; top: 0; z-index: 50; width: 100%;
-            background: color-mix(in srgb, var(--paper) 85%, transparent);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--line);
+            background: var(--paper);
+            border-bottom: 1px solid var(--line-2);
         }
         .edu-header-inner {
             max-width: 1100px; margin: 0 auto;
@@ -135,27 +136,31 @@
         .shell { max-width: 1100px; margin: 0 auto; padding: 34px 30px 70px; }
         .shell > * + * { margin-top: 28px; }
 
-        /* ─── Page header (solid title → full-width lead) ─── */
-        .page-header { text-align: center; padding: 12px 0 18px; }
+        /* ─── Page header (left-aligned solid title → full-width lead → rule) ─── */
+        .page-header { text-align: left; padding: 10px 0 30px; border-bottom: 1px solid var(--line-2); }
         .app-title {
             font-family: var(--font-display); font-weight: 800;
-            font-size: clamp(2rem, 4.5vw, 2.85rem); letter-spacing: -.025em;
+            font-size: clamp(2.3rem, 5vw, 3.3rem); letter-spacing: -.025em;
             line-height: 1.05; color: var(--ink);
         }
-        .edu-lead { font-size: 1.0625rem; color: var(--ink-2); margin: 14px 0 0; }
+        .edu-lead { font-size: 1.15rem; line-height: 1.6; color: var(--ink-2); margin: 14px 0 0; }
 
-        /* ─── Cards ─── */
+        /* ─── Cards: --line-2 contour, stone head strip, white body ─── */
         .card {
             background: var(--surface);
-            border: 1px solid var(--line);
+            border: 1px solid var(--line-2);
             border-radius: var(--r-xl);
             box-shadow: var(--shadow-md);
-            padding: 30px 34px;
+            overflow: hidden;
         }
+        .card-head {
+            padding: 16px 34px; background: var(--paper-2);
+            border-bottom: 1px solid var(--line);
+        }
+        .card-body { padding: 26px 34px 30px; }
         .card-title {
-            font-family: var(--font-display); font-weight: 700; font-size: var(--h3);
+            font-family: var(--font-display); font-weight: 700; font-size: 22px;
             line-height: 1.2; letter-spacing: -.015em; color: var(--ink);
-            margin-bottom: 18px;
         }
 
         .problem-well {
@@ -222,9 +227,11 @@
         textarea.answer::placeholder { color: var(--ink-3); }
         textarea.answer:focus { border-color: var(--ink-3); }
 
-        .persona-card { background: var(--surface); border: 1px solid var(--line);
-                        border-radius: var(--r-lg); padding: 18px 20px; margin-top: 12px; box-shadow: var(--shadow-sm); }
-        .persona-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--ink); }
+        .persona-card { background: var(--surface); border: 1px solid var(--line-2);
+                        border-radius: var(--r-lg); margin-top: 12px; box-shadow: var(--shadow-sm); overflow: hidden; }
+        .persona-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--ink);
+                        padding: 12px 20px; background: var(--paper-2); border-bottom: 1px solid var(--line); }
+        .persona-body { padding: 6px 20px 16px; }
         .persona-field { margin-top: 8px; font-size: 14.5px; color: var(--ink-2); }
         .persona-field .edu-overline { display: block; margin-bottom: 2px; }
 
@@ -234,11 +241,11 @@
             font-family: var(--font-display); font-weight: 600; font-size: var(--body-sm);
             padding: 9px 16px; border-radius: var(--r-pill);
             background: var(--surface); color: var(--ink);
-            border: 1px solid var(--line-2);
+            border: 1px solid var(--line-strong);
             transition: background .15s ease, color .15s ease;
         }
         .example-toggle:hover { background: var(--paper-3); }
-        .example-toggle.is-open { background: var(--blue); color: var(--blue-ink); border-color: var(--blue); }
+        .example-toggle.is-open { background: var(--blue-soft); color: var(--blue-ink); border-color: var(--blue-soft); }
         .example-answer {
             margin-top: 14px; padding: 18px 20px;
             background: var(--blue-soft); color: var(--blue-ink);
@@ -252,7 +259,7 @@
         .fact-chips { display: flex; flex-wrap: wrap; gap: 8px; }
         .fact-chip { font-family: var(--font-mono); font-size: var(--overline); padding: 6px 12px;
                      border-radius: var(--r-pill); background: var(--green-soft); color: var(--green-ink); }
-        .inv-question { border: 1px solid var(--line); border-radius: var(--r-md);
+        .inv-question { border: 1px solid var(--line-strong); border-radius: var(--r-md);
                         padding: 12px 16px; margin-top: 10px; background: var(--surface);
                         transition: background .15s ease; }
         .inv-question:has(button:not(:disabled)):hover { background: var(--paper-2); }
@@ -291,15 +298,15 @@
             display: inline-flex; align-items: center; gap: 8px;
             font-family: var(--font-display); font-weight: 600; font-size: var(--body);
             background: var(--surface); color: var(--ink);
-            border: 1px solid var(--line-2);
+            border: 1px solid var(--line-strong);
             border-radius: var(--r-pill); padding: 11px 21px;
             transition: background .15s ease, color .15s ease;
         }
         .edu-btn-ghost:hover:not(:disabled) { background: var(--paper-2); }
 
         .edu-btn-sm { padding: 8px 16px; font-size: var(--body-sm); }
-        .edu-btn-ghost.is-danger { color: var(--red); }
-        .edu-btn-ghost.is-danger:hover:not(:disabled) { background: var(--red); color: var(--red-ink); border-color: var(--red); }
+        .edu-btn-ghost.is-danger { color: var(--red-600); }
+        .edu-btn-ghost.is-danger:hover:not(:disabled) { background: var(--red-soft); color: var(--red-ink); border-color: var(--red-soft); }
 
         /* ─── Summary ─── */
         .summary-list { margin-top: 6px; }
@@ -320,7 +327,10 @@
             .edu-header-inner { padding: 6px 16px; }
             .edu-logo { width: 48px; height: 48px; }
             .shell { padding: 28px 16px 56px; }
-            .card { padding: 22px 20px; border-radius: var(--r-lg); }
+            .card { border-radius: var(--r-lg); }
+            .card-head { padding: 14px 20px; }
+            .card-body { padding: 20px 20px 22px; }
+            .page-header { padding: 4px 0 24px; }
             .progress-row { gap: 8px; }
             .step-label { display: none; }
             .progress-caption { display: block; }
@@ -790,7 +800,7 @@
         const RENDER = {};
         FLOW.forEach(screen => {
             RENDER[screen] = () => {
-                screenRoot.innerHTML = `<section class="card"><p class="edu-p">${t('placeholder.screen')}: ${screen}</p></section>`;
+                screenRoot.innerHTML = `<section class="card"><div class="card-body"><p class="edu-p">${t('placeholder.screen')}: ${screen}</p></div></section>`;
             };
         });
         function warmupNext() {
@@ -809,7 +819,8 @@
             const revealed = STATE.warmup.exampleRevealed[q.id];
             screenRoot.innerHTML = `
                 <section class="card">
-                    <h2 class="card-title">${t('warmup.eyebrow')}</h2>
+                    <div class="card-head"><h2 class="card-title">${t('warmup.eyebrow')}</h2></div>
+                    <div class="card-body">
                     <div class="problem-well">${WARMUP.brief}</div>
                     <div class="hint-note edu-block"><p>${t('warmup.hint')}</p></div>
                     <div class="question-panel question-enter">
@@ -828,6 +839,7 @@
                             <button type="button" class="edu-btn edu-btn-sm" data-action="warmup-next">${t('nav.next')} →</button>
                         </div>
                     </div>
+                </div>
                 </section>`;
             screenRoot.querySelector('#warmup-answer').addEventListener('input', e => {
                 STATE.warmup.responses[q.id] = e.target.value; persist();
@@ -841,9 +853,11 @@
         RENDER.interstitial = () => {
             screenRoot.innerHTML = `
                 <section class="card" style="text-align:center">
+                    <div class="card-body">
                     <h2 class="edu-h2">${t('interstitial.title')}</h2>
                     <p class="edu-body-lg" style="margin:14px auto 24px">${t('interstitial.body')}</p>
                     <button type="button" class="edu-btn" data-action="start-flagship">${t('interstitial.cta')}</button>
+                </div>
                 </section>`;
             screenRoot.querySelector('[data-action="start-flagship"]').addEventListener('click', () => go('investigate'));
         };
@@ -878,7 +892,8 @@
             const needsAssumption = STATE.investigation.crucialAsked && STATE.ledger.length === 0;
             screenRoot.innerHTML = `
                 <section class="card">
-                    <h2 class="card-title">${t('inv.eyebrow')}</h2>
+                    <div class="card-head"><h2 class="card-title">${t('inv.eyebrow')}</h2></div>
+                    <div class="card-body">
                     <div class="problem-well">${FLAGSHIP.brief}</div>
                     <div class="inv-layout" style="margin-top:18px">
                         <div>
@@ -907,6 +922,7 @@
                         </div>
                         ${renderLedgerPanel()}
                     </div>
+                </div>
                 </section>`;
             screenRoot.querySelectorAll('[data-ask]').forEach(b =>
                 b.addEventListener('click', () => askQuestion(b.dataset.ask)));
@@ -920,7 +936,8 @@
             const gapUnnoticed = STATE.ledger.length === 0;
             screenRoot.innerHTML = `
                 <section class="card">
-                    <h2 class="card-title">${t('chk.title')}</h2>
+                    <div class="card-head"><h2 class="card-title">${t('chk.title')}</h2></div>
+                    <div class="card-body">
                     <p class="question-text">${t('chk.question')}</p>
                     ${gapUnnoticed ? `
                         <div class="hint-note edu-block" style="margin-top:16px"><p><strong>${FLAGSHIP.gapPrompt}</strong></p></div>
@@ -933,6 +950,7 @@
                         <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
                         <button type="button" class="edu-btn" data-action="to-plan" ${STATE.ledger.length ? '' : 'disabled'}>${t('chk.continue')} →</button>
                     </div>
+                </div>
                 </section>`;
             const addBtn = screenRoot.querySelector('[data-action="add-assumption"]');
             if (addBtn) addBtn.addEventListener('click', () =>
@@ -944,7 +962,8 @@
         RENDER.plan = () => {
             screenRoot.innerHTML = `
                 <section class="card">
-                    <h2 class="card-title">${t('plan.eyebrow')}</h2>
+                    <div class="card-head"><h2 class="card-title">${t('plan.eyebrow')}</h2></div>
+                    <div class="card-body">
                     <div class="inv-layout">
                         <div>
                             ${FLAGSHIP.planPrompts.map((p, i) => `
@@ -962,6 +981,7 @@
                         </div>
                         ${renderLedgerPanel()}
                     </div>
+                </div>
                 </section>`;
             screenRoot.querySelectorAll('[data-plan]').forEach(area =>
                 area.addEventListener('input', e => { STATE.plan.responses[area.dataset.plan] = e.target.value; persist(); }));
@@ -973,7 +993,8 @@
             const assumptions = STATE.ledger.map(a => escapeHtml(a.text)).join('; ');
             screenRoot.innerHTML = `
                 <section class="card">
-                    <h2 class="card-title">${t('exec.eyebrow')}</h2>
+                    <div class="card-head"><h2 class="card-title">${t('exec.eyebrow')}</h2></div>
+                    <div class="card-body">
                     <div class="inv-layout">
                         <div>
                             <div class="question-panel">
@@ -993,6 +1014,7 @@
                         </div>
                         ${renderLedgerPanel()}
                     </div>
+                </div>
                 </section>`;
             screenRoot.querySelector('#exec-work').addEventListener('input', e => { STATE.execute.work = e.target.value; persist(); });
             screenRoot.querySelector('#exec-answer').addEventListener('input', e => {
@@ -1007,7 +1029,8 @@
             const lb = STATE.lookback;
             screenRoot.innerHTML = `
                 <section class="card">
-                    <h2 class="card-title">${t('look.eyebrow')}</h2>
+                    <div class="card-head"><h2 class="card-title">${t('look.eyebrow')}</h2></div>
+                    <div class="card-body">
                     <h3 class="edu-h4">${t('look.sensTitle')}</h3>
                     ${FLAGSHIP.sensitivity.map((s, i) => `
                         <div class="question-panel" style="margin-top:14px">
@@ -1023,9 +1046,11 @@
                         ${FLAGSHIP.gallery.map(p => `
                             <div class="persona-card question-enter">
                                 <div class="persona-name">${p.name}</div>
+                                <div class="persona-body">
                                 <div class="persona-field"><span class="edu-overline">${t('look.personaAssumption')}</span>${escapeHtml(p.assumption)}</div>
                                 <div class="persona-field">${escapeHtml(p.solution)}</div>
                                 <div class="persona-field"><span class="edu-overline">${t('look.personaResult')}</span>${escapeHtml(p.result)}</div>
+                                </div>
                             </div>`).join('')}
                         <div class="question-panel" style="margin-top:22px">
                             <span class="question-text">${t('look.reflection')}</span>
@@ -1039,6 +1064,7 @@
                             <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
                             <button type="button" class="edu-btn" data-action="reveal-gallery">${t('look.galleryCta')}</button>
                         </div>`}
+                </div>
                 </section>`;
             screenRoot.querySelectorAll('[data-sens]').forEach(area =>
                 area.addEventListener('input', e => { STATE.lookback.reactions[area.dataset.sens] = e.target.value; persist(); }));
@@ -1054,7 +1080,8 @@
         RENDER.summary = () => {
             screenRoot.innerHTML = `
                 <section class="card" id="printArea">
-                    <h2 class="card-title">${t('sum.eyebrow')}</h2>
+                    <div class="card-head"><h2 class="card-title">${t('sum.eyebrow')}</h2></div>
+                    <div class="card-body">
                     <div class="problem-well">${FLAGSHIP.brief}</div>
                     <h4 class="edu-h4" style="margin-top:18px">${t('sum.assumptions')}</h4>
                     <ul class="summary-list">${STATE.ledger.map(a => `<li class="edu-p">• ${escapeHtml(a.text)}</li>`).join('')}</ul>
@@ -1066,6 +1093,7 @@
                         <button type="button" class="edu-btn-ghost is-danger edu-btn-sm" data-action="reset">${t('nav.reset')}</button>
                         <button type="button" class="edu-btn" data-action="print">${t('sum.print')}</button>
                     </div>
+                </div>
                 </section>`;
             screenRoot.querySelector('[data-action="reset"]').addEventListener('click', handleReset);
             screenRoot.querySelector('[data-action="print"]').addEventListener('click', () => window.print());
