@@ -8,6 +8,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap">
     <style>
+        @keyframes boot-reveal { to { visibility: visible; } }
+        html:not(.app-ready) body { visibility: hidden; animation: boot-reveal 0s 4s forwards; }
+        @media print { html:not(.app-ready) body { visibility: visible; animation: none; } }
+    </style>
+    <noscript><style>html:not(.app-ready) body { visibility: visible; animation: none; }</style></noscript>
+    <style>
         /* ============================================================
            edulab - Colors & Type foundation (edustyl tokens)
            ============================================================ */
@@ -145,19 +151,25 @@
         }
         .edu-lead { font-size: 1.15rem; line-height: 1.6; color: var(--ink-2); margin: 14px 0 0; }
 
-        /* ─── Cards: --line-2 contour, stone head strip, white body ─── */
+        /* ─── Cards: --line-2 contour, stone head strip, white body, dashed foot ─── */
         .card {
             background: var(--surface);
             border: 1px solid var(--line-2);
-            border-radius: var(--r-xl);
-            box-shadow: var(--shadow-md);
+            border-radius: var(--r-lg);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
+            display: flex; flex-direction: column;
         }
         .card-head {
-            padding: 16px 34px; background: var(--paper-2);
+            padding: 14px 22px; background: var(--paper-2);
             border-bottom: 1px solid var(--line);
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
         }
-        .card-body { padding: 26px 34px 30px; }
+        .card-body { padding: 22px 22px 24px; flex: 1; }
+        .card-foot {
+            padding: 14px 22px; border-top: 1px dashed var(--line-2);
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        }
         .card-title {
             font-family: var(--font-display); font-weight: 700; font-size: 22px;
             line-height: 1.2; letter-spacing: -.015em; color: var(--ink);
@@ -253,7 +265,6 @@
         }
         .example-answer-text { white-space: pre-wrap; font-size: 15px; line-height: 1.6; }
 
-        .question-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
 
         /* ─── Investigate screen ─── */
         .fact-chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -327,9 +338,9 @@
             .edu-header-inner { padding: 6px 16px; }
             .edu-logo { width: 48px; height: 48px; }
             .shell { padding: 28px 16px 56px; }
-            .card { border-radius: var(--r-lg); }
-            .card-head { padding: 14px 20px; }
-            .card-body { padding: 20px 20px 22px; }
+            .card-head { padding: 12px 16px; }
+            .card-body { padding: 18px 16px 20px; }
+            .card-foot { padding: 12px 16px; }
             .page-header { padding: 4px 0 24px; }
             .progress-row { gap: 8px; }
             .step-label { display: none; }
@@ -340,7 +351,7 @@
         }
 
         @media print {
-            .edu-header, .page-header, #progressBar, .question-nav { display: none; }
+            .edu-header, .page-header, #progressBar, .card-foot { display: none; }
             body.edu { background: var(--surface); }
             .card { box-shadow: none; border: none; }
         }
@@ -565,14 +576,14 @@
                 'ledger.title': 'Dziennik założeń', 'ledger.empty': 'Brak założeń – jeszcze.',
                 'ledger.add': 'Zapisz założenie',
                 'placeholder.screen': 'Ekran w budowie',
-                'warmup.eyebrow': 'Rozgrzewka · zadanie szkolne',
+                'warmup.title': 'Rozgrzewka · zadanie szkolne',
                 'warmup.hint': 'To zwykłe zadanie – wszystkie dane są podane. Rozwiąż je szybko.',
                 'interstitial.title': 'To było zadanie szkolne',
                 'interstitial.body': 'Miałeś wszystkie dane i istniała jedna dobra odpowiedź. Prawdziwe problemy takie nie są: czegoś zawsze brakuje i nie ma jednej dobrej odpowiedzi. Gotowy na prawdziwy problem?',
                 'interstitial.cta': 'Pokaż prawdziwy problem',
                 'warmup.example.show': 'Pokaż przykładową odpowiedź',
                 'warmup.example.hide': 'Ukryj przykładową odpowiedź',
-                'inv.eyebrow': 'Krok 1 · Zrozumienie Problemu',
+                'inv.title': 'Zrozumienie problemu',
                 'inv.facts': 'Co wiesz',
                 'inv.menu': 'Zadaj pytanie (możesz wybrać {n})',
                 'inv.budgetLeft': 'Pozostałe pytania: {n}',
@@ -582,14 +593,14 @@
                 'chk.question': 'Czy masz wszystko, czego potrzebujesz, żeby policzyć odpowiedź?',
                 'chk.ok': 'Masz zapisane założenie – możesz planować.',
                 'chk.continue': 'Planuję',
-                'plan.eyebrow': 'Krok 2 · Opracowanie Planu',
-                'exec.eyebrow': 'Krok 3 · Realizacja Planu',
+                'plan.title': 'Opracowanie planu',
+                'exec.title': 'Realizacja planu',
                 'exec.work': 'Twoje obliczenia i notatki',
                 'exec.answerFrame': 'Zakładając, że...',
                 'exec.answerLabel': '...moja odpowiedź to:',
                 'exec.next': 'Sprawdzam swój plan',
                 'plan.next': 'Realizuję plan',
-                'look.eyebrow': 'Krok 4 · Spojrzenie Wstecz',
+                'look.title': 'Spojrzenie wstecz',
                 'look.sensTitle': 'Sprawdź wytrzymałość swojego planu',
                 'look.galleryCta': 'Zobacz, jak rozwiązali to inni',
                 'look.galleryTitle': 'Trzy różne odpowiedzi. Wszystkie dobre.',
@@ -598,7 +609,7 @@
                 'look.personaResult': 'Wynik',
                 'look.reflection': 'Co ten problem miał w sobie, czego nie ma zadanie szkolne?',
                 'look.next': 'Pokaż podsumowanie',
-                'sum.eyebrow': 'Podsumowanie · Twoja przygoda',
+                'sum.title': 'Podsumowanie · Twoja przygoda',
                 'sum.answer': 'Twoja odpowiedź',
                 'sum.assumptions': 'Twoje założenia',
                 'sum.reflection': 'Twoja refleksja',
@@ -611,14 +622,14 @@
                 'ledger.title': 'Assumption ledger', 'ledger.empty': 'No assumptions – yet.',
                 'ledger.add': 'Save assumption',
                 'placeholder.screen': 'Screen under construction',
-                'warmup.eyebrow': 'Warm-up · a school exercise',
+                'warmup.title': 'Warm-up · a school exercise',
                 'warmup.hint': 'A regular exercise – all the data is given. Solve it quickly.',
                 'interstitial.title': 'That was a school exercise',
                 'interstitial.body': 'You had all the data and there was one right answer. Real problems are not like that: something is always missing and there is no single right answer. Ready for a real one?',
                 'interstitial.cta': 'Show me a real problem',
                 'warmup.example.show': 'Show an example answer',
                 'warmup.example.hide': 'Hide the example answer',
-                'inv.eyebrow': 'Step 1 · Understand the Problem',
+                'inv.title': 'Understand the problem',
                 'inv.facts': 'What you know',
                 'inv.menu': 'Ask a question (you may pick {n})',
                 'inv.budgetLeft': 'Questions left: {n}',
@@ -628,14 +639,14 @@
                 'chk.question': 'Do you have everything you need to compute an answer?',
                 'chk.ok': 'You have an assumption on record – go plan.',
                 'chk.continue': 'Let me plan',
-                'plan.eyebrow': 'Step 2 · Devise a Plan',
-                'exec.eyebrow': 'Step 3 · Carry Out the Plan',
+                'plan.title': 'Devise a plan',
+                'exec.title': 'Carry out the plan',
                 'exec.work': 'Your calculations and notes',
                 'exec.answerFrame': 'Assuming that...',
                 'exec.answerLabel': '...my answer is:',
                 'exec.next': 'Check my plan',
                 'plan.next': 'Carry out the plan',
-                'look.eyebrow': 'Step 4 · Look Back',
+                'look.title': 'Look back',
                 'look.sensTitle': 'Stress-test your plan',
                 'look.galleryCta': 'See how others solved it',
                 'look.galleryTitle': 'Three different answers. All of them good.',
@@ -644,7 +655,7 @@
                 'look.personaResult': 'Result',
                 'look.reflection': 'What did this problem have that a school exercise does not?',
                 'look.next': 'Show the summary',
-                'sum.eyebrow': 'Summary · Your journey',
+                'sum.title': 'Summary · Your journey',
                 'sum.answer': 'Your answer',
                 'sum.assumptions': 'Your assumptions',
                 'sum.reflection': 'Your reflection',
@@ -819,7 +830,7 @@
             const revealed = STATE.warmup.exampleRevealed[q.id];
             screenRoot.innerHTML = `
                 <section class="card">
-                    <div class="card-head"><h2 class="card-title">${t('warmup.eyebrow')}</h2></div>
+                    <div class="card-head"><h2 class="card-title">${t('warmup.title')}</h2></div>
                     <div class="card-body">
                     <div class="problem-well">${WARMUP.brief}</div>
                     <div class="hint-note edu-block"><p>${t('warmup.hint')}</p></div>
@@ -834,12 +845,12 @@
                                 aria-expanded="${Boolean(revealed)}">${revealed ? t('warmup.example.hide') : t('warmup.example.show')}</button>
                             ${revealed ? `<div class="example-answer edu-block question-enter"><div class="example-answer-text">${q.example}</div></div>` : ''}
                         </div>
-                        <div class="question-nav">
-                            <span></span>
-                            <button type="button" class="edu-btn edu-btn-sm" data-action="warmup-next">${t('nav.next')} →</button>
-                        </div>
                     </div>
                 </div>
+                    <div class="card-foot">
+                        <span></span>
+                        <button type="button" class="edu-btn edu-btn-sm" data-action="warmup-next">${t('nav.next')} →</button>
+                    </div>
                 </section>`;
             screenRoot.querySelector('#warmup-answer').addEventListener('input', e => {
                 STATE.warmup.responses[q.id] = e.target.value; persist();
@@ -892,7 +903,7 @@
             const needsAssumption = STATE.investigation.crucialAsked && STATE.ledger.length === 0;
             screenRoot.innerHTML = `
                 <section class="card">
-                    <div class="card-head"><h2 class="card-title">${t('inv.eyebrow')}</h2></div>
+                    <div class="card-head"><h2 class="card-title">${t('inv.title')}</h2></div>
                     <div class="card-body">
                     <div class="problem-well">${FLAGSHIP.brief}</div>
                     <div class="inv-layout" style="margin-top:18px">
@@ -915,14 +926,14 @@
                                     <textarea class="answer" id="assumption-input" style="min-height:64px"></textarea>
                                     <button type="button" class="edu-btn edu-btn-sm" data-action="add-assumption">${t('ledger.add')}</button>
                                 </div>` : ''}
-                            <div class="question-nav" style="margin-top:20px">
-                                <span></span>
-                                <button type="button" class="edu-btn" data-action="to-checkpoint" ${canLeaveInvestigate() ? '' : 'disabled'}>${t('inv.next')} →</button>
-                            </div>
                         </div>
                         ${renderLedgerPanel()}
                     </div>
                 </div>
+                    <div class="card-foot">
+                        <span></span>
+                        <button type="button" class="edu-btn" data-action="to-checkpoint" ${canLeaveInvestigate() ? '' : 'disabled'}>${t('inv.next')} →</button>
+                    </div>
                 </section>`;
             screenRoot.querySelectorAll('[data-ask]').forEach(b =>
                 b.addEventListener('click', () => askQuestion(b.dataset.ask)));
@@ -946,11 +957,11 @@
                             <button type="button" class="edu-btn edu-btn-sm" data-action="add-assumption">${t('ledger.add')}</button>
                         </div>` : `
                         <p class="edu-p" style="margin-top:12px">${t('chk.ok')}</p>`}
-                    <div class="question-nav" style="margin-top:20px">
+                </div>
+                    <div class="card-foot">
                         <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
                         <button type="button" class="edu-btn" data-action="to-plan" ${STATE.ledger.length ? '' : 'disabled'}>${t('chk.continue')} →</button>
                     </div>
-                </div>
                 </section>`;
             const addBtn = screenRoot.querySelector('[data-action="add-assumption"]');
             if (addBtn) addBtn.addEventListener('click', () =>
@@ -962,7 +973,7 @@
         RENDER.plan = () => {
             screenRoot.innerHTML = `
                 <section class="card">
-                    <div class="card-head"><h2 class="card-title">${t('plan.eyebrow')}</h2></div>
+                    <div class="card-head"><h2 class="card-title">${t('plan.title')}</h2></div>
                     <div class="card-body">
                     <div class="inv-layout">
                         <div>
@@ -974,14 +985,14 @@
                                     </div>
                                     <textarea class="answer" data-plan="${p.id}">${escapeHtml(STATE.plan.responses[p.id] || '')}</textarea>
                                 </div>`).join('')}
-                            <div class="question-nav" style="margin-top:20px">
-                                <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
-                                <button type="button" class="edu-btn" data-action="to-execute">${t('plan.next')} →</button>
-                            </div>
                         </div>
                         ${renderLedgerPanel()}
                     </div>
                 </div>
+                    <div class="card-foot">
+                        <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
+                        <button type="button" class="edu-btn" data-action="to-execute">${t('plan.next')} →</button>
+                    </div>
                 </section>`;
             screenRoot.querySelectorAll('[data-plan]').forEach(area =>
                 area.addEventListener('input', e => { STATE.plan.responses[area.dataset.plan] = e.target.value; persist(); }));
@@ -993,7 +1004,7 @@
             const assumptions = STATE.ledger.map(a => escapeHtml(a.text)).join('; ');
             screenRoot.innerHTML = `
                 <section class="card">
-                    <div class="card-head"><h2 class="card-title">${t('exec.eyebrow')}</h2></div>
+                    <div class="card-head"><h2 class="card-title">${t('exec.title')}</h2></div>
                     <div class="card-body">
                     <div class="inv-layout">
                         <div>
@@ -1007,14 +1018,14 @@
                                 <span class="question-text">${t('exec.answerLabel')}</span>
                                 <textarea class="answer" id="exec-answer" style="min-height:64px">${escapeHtml(STATE.execute.answer)}</textarea>
                             </div>
-                            <div class="question-nav" style="margin-top:20px">
-                                <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
-                                <button type="button" class="edu-btn" data-action="to-lookback" ${STATE.execute.answer.trim() ? '' : 'disabled'}>${t('exec.next')} →</button>
-                            </div>
                         </div>
                         ${renderLedgerPanel()}
                     </div>
                 </div>
+                    <div class="card-foot">
+                        <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
+                        <button type="button" class="edu-btn" data-action="to-lookback" ${STATE.execute.answer.trim() ? '' : 'disabled'}>${t('exec.next')} →</button>
+                    </div>
                 </section>`;
             screenRoot.querySelector('#exec-work').addEventListener('input', e => { STATE.execute.work = e.target.value; persist(); });
             screenRoot.querySelector('#exec-answer').addEventListener('input', e => {
@@ -1029,7 +1040,7 @@
             const lb = STATE.lookback;
             screenRoot.innerHTML = `
                 <section class="card">
-                    <div class="card-head"><h2 class="card-title">${t('look.eyebrow')}</h2></div>
+                    <div class="card-head"><h2 class="card-title">${t('look.title')}</h2></div>
                     <div class="card-body">
                     <h3 class="edu-h4">${t('look.sensTitle')}</h3>
                     ${FLAGSHIP.sensitivity.map((s, i) => `
@@ -1055,16 +1066,14 @@
                         <div class="question-panel" style="margin-top:22px">
                             <span class="question-text">${t('look.reflection')}</span>
                             <textarea class="answer" id="reflection-input" style="min-height:80px">${escapeHtml(lb.reflection)}</textarea>
-                        </div>
-                        <div class="question-nav" style="margin-top:20px">
-                            <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
-                            <button type="button" class="edu-btn" data-action="to-summary">${t('look.next')} →</button>
-                        </div>` : `
-                        <div class="question-nav" style="margin-top:20px">
-                            <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
-                            <button type="button" class="edu-btn" data-action="reveal-gallery">${t('look.galleryCta')}</button>
-                        </div>`}
+                        </div>` : ''}
                 </div>
+                    <div class="card-foot">
+                        <button type="button" class="edu-btn-ghost edu-btn-sm" data-action="back">← ${t('nav.prev')}</button>
+                        ${lb.galleryRevealed
+                            ? `<button type="button" class="edu-btn" data-action="to-summary">${t('look.next')} →</button>`
+                            : `<button type="button" class="edu-btn" data-action="reveal-gallery">${t('look.galleryCta')}</button>`}
+                    </div>
                 </section>`;
             screenRoot.querySelectorAll('[data-sens]').forEach(area =>
                 area.addEventListener('input', e => { STATE.lookback.reactions[area.dataset.sens] = e.target.value; persist(); }));
@@ -1080,7 +1089,7 @@
         RENDER.summary = () => {
             screenRoot.innerHTML = `
                 <section class="card" id="printArea">
-                    <div class="card-head"><h2 class="card-title">${t('sum.eyebrow')}</h2></div>
+                    <div class="card-head"><h2 class="card-title">${t('sum.title')}</h2></div>
                     <div class="card-body">
                     <div class="problem-well">${FLAGSHIP.brief}</div>
                     <h4 class="edu-h4" style="margin-top:18px">${t('sum.assumptions')}</h4>
@@ -1089,11 +1098,11 @@
                     <p class="edu-p" style="white-space:pre-wrap">${escapeHtml(STATE.execute.answer)}</p>
                     <h4 class="edu-h4" style="margin-top:18px">${t('sum.reflection')}</h4>
                     <p class="edu-p" style="white-space:pre-wrap">${escapeHtml(STATE.lookback.reflection)}</p>
-                    <div class="question-nav" style="margin-top:24px">
+                </div>
+                    <div class="card-foot">
                         <button type="button" class="edu-btn-ghost is-danger edu-btn-sm" data-action="reset">${t('nav.reset')}</button>
                         <button type="button" class="edu-btn" data-action="print">${t('sum.print')}</button>
                     </div>
-                </div>
                 </section>`;
             screenRoot.querySelector('[data-action="reset"]').addEventListener('click', handleReset);
             screenRoot.querySelector('[data-action="print"]').addEventListener('click', () => window.print());
@@ -1123,13 +1132,24 @@
 
         // ─── Init ───
         document.addEventListener('DOMContentLoaded', () => {
-            if (location.search.includes('selftest=1')) { TESTING = true; runSelfTests(); return; }
+            if (location.search.includes('selftest=1')) { TESTING = true; runSelfTests(); reveal(); return; }
             restore();
             const jump = new URLSearchParams(location.search).get('screen');
             if (jump && FLOW.includes(jump)) STATE.screen = jump;
             syncLangToggle();
             renderAll();
+            reveal();
         });
+
+        // ─── Reveal (boot gate: show the page once brand fonts are in) ───
+        const FONT_WAIT_MS = 1500;
+        const BRAND_FONTS = ['400 1em Outfit', '700 1em Outfit', '400 1em "IBM Plex Sans"', '600 1em "IBM Plex Sans"', '400 1em "Roboto Mono"'];
+        function reveal() {
+            Promise.race([
+                Promise.all(BRAND_FONTS.map(f => document.fonts.load(f).catch(() => null))),
+                new Promise(r => setTimeout(r, FONT_WAIT_MS)),
+            ]).then(() => document.documentElement.classList.add('app-ready'));
+        }
     </script>
 </body>
 </html>
